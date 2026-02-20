@@ -1,0 +1,46 @@
+
+export type FieldType = 'text' | 'select' | 'radio' | 'checkbox';
+
+export interface FormField {
+  id: string;
+  type: FieldType;
+  label: string;
+  options?: string[];
+  required?: boolean;
+}
+
+export interface FormSection {
+  id: string;
+  title: string;
+  fields: FormField[];
+}
+
+export interface FormSchema {
+  title: string;
+  sections: FormSection[];
+  startSectionId: string;
+}
+
+export type LogicNodeType = 'section' | 'condition' | 'action';
+
+export interface ConditionRule {
+  id: string;
+  fieldId: string;
+  operator: 'equals' | 'not_equals' | 'contains';
+  value: string;
+}
+
+export interface ActionConfig {
+  type: 'redirect' | 'webhook';
+  url?: string;
+  message?: string;
+}
+
+export interface LogicNodeData {
+  label: string;
+  type: LogicNodeType;
+  sectionId?: string;
+  fields?: FormField[];
+  rules?: ConditionRule[];
+  actionConfig?: ActionConfig;
+}
