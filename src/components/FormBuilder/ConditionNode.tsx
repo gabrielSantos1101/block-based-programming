@@ -95,6 +95,12 @@ export const ConditionNode = memo(({ id, data, selected }: NodeProps) => {
                   <option value="equals">Equals</option>
                   <option value="not_equals">Not Equals</option>
                   <option value="contains">Contains</option>
+                  <option value="greater_than">Greater Than</option>
+                  <option value="less_than">Less Than</option>
+                  <option value="greater_equal">Greater or Equal</option>
+                  <option value="less_equal">Less or Equal</option>
+                  <option value="is_empty">Is Empty</option>
+                  <option value="is_not_empty">Is Not Empty</option>
                 </select>
                 <input 
                   type="text" 

@@ -40,6 +40,18 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
         return fieldValue !== rule.value;
       case 'contains':
         return fieldValue.includes(rule.value);
+      case 'greater_than':
+        return Number(fieldValue) > Number(rule.value);
+      case 'less_than':
+        return Number(fieldValue) < Number(rule.value);
+      case 'greater_equal':
+        return Number(fieldValue) >= Number(rule.value);
+      case 'less_equal':
+        return Number(fieldValue) <= Number(rule.value);
+      case 'is_empty':
+        return fieldValue.trim() === '';
+      case 'is_not_empty':
+        return fieldValue.trim() !== '';
       default:
         return false;
     }
