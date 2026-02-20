@@ -146,16 +146,26 @@ export const LogicEditor: React.FC<LogicEditorProps> = ({
   }, [activeSectionId, setNodes]);
 
   const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge({ 
-      ...params, 
-      animated: true, 
-      style: { stroke: '#94a3b8', strokeWidth: 2 },
-      markerEnd: {
-        type: MarkerType.ArrowClosed,
-        color: '#94a3b8',
-      },
-    } as Edge, eds)),
-    [setEdges],
+    (params: Connection) => {
+      const sourceNode = nodes.find(n => n.id === params.source);
+      const targetNode = nodes.find(n => n.id === params.target);
+
+      if (sourceNode?.type === 'sectionNode' && targetNode?.type === 'logicalOperatorNode') {
+        console.warn('Cannot connect a Section directly to a Logical Operator');
+        return;
+      }
+
+      setEdges((eds) => addEdge({ 
+        ...params, 
+        animated: true, 
+        style: { stroke: '#94a3b8', strokeWidth: 2 },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          color: '#94a3b8',
+        },
+      } as Edge, eds));
+    },
+    [setEdges, nodes],
   );
 
   const onEdgeClick = useCallback(
