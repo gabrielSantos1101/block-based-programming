@@ -22,7 +22,8 @@ import '@xyflow/react/dist/style.css';
 import type { FormSection, FormField } from '@/types';
 import { ConditionNode } from './ConditionNode';
 import { ActionNode } from './ActionNode';
-import { Split, Zap } from 'lucide-react';
+import { LogicalOperatorNode } from './LogicalOperatorNode';
+import { Split, Zap, GitBranch } from 'lucide-react';
 
 interface LogicEditorProps {
   sections: FormSection[];
@@ -86,7 +87,8 @@ export const LogicEditor: React.FC<LogicEditorProps> = ({
   const nodeTypes = useMemo(() => ({ 
     sectionNode: SectionNode,
     conditionNode: ConditionNode,
-    actionNode: ActionNode
+    actionNode: ActionNode,
+    logicalOperatorNode: LogicalOperatorNode
   }), []);
 
   useEffect(() => {
@@ -156,7 +158,7 @@ export const LogicEditor: React.FC<LogicEditorProps> = ({
     [setEdges],
   );
 
-  const addNode = (type: 'condition' | 'action') => {
+  const addNode = (type: 'condition' | 'action' | 'and' | 'or' | 'not') => {
     const id = `${type}_${Date.now()}`;
     const position = { x: 400, y: 100 };
     
@@ -174,7 +176,7 @@ export const LogicEditor: React.FC<LogicEditorProps> = ({
           },
         },
       ]);
-    } else {
+    } else if (type === 'action') {
       setNodes((nds) => [
         ...nds,
         {
@@ -184,6 +186,22 @@ export const LogicEditor: React.FC<LogicEditorProps> = ({
           data: { 
             label: 'Action',
             actionConfig: { type: 'redirect', url: '' }
+          },
+        },
+      ]);
+    } else {
+      const operatorMap = { and: 'AND', or: 'OR', not: 'NOT' } as const;
+      const operator = operatorMap[type as keyof typeof operatorMap];
+      setNodes((nds) => [
+        ...nds,
+        {
+          id,
+          type: 'logicalOperatorNode',
+          position,
+          data: { 
+            label: operator,
+            operator,
+            inputs: operator === 'NOT' ? 1 : 2
           },
         },
       ]);
@@ -214,8 +232,8 @@ export const LogicEditor: React.FC<LogicEditorProps> = ({
         <MiniMap />
         <Background gap={12} size={1} />
         
-        <Panel position="top-left" className="bg-white p-2 rounded-lg shadow-md border border-slate-200 flex gap-2">
-          <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider py-1 px-2">Add Node:</div>
+        <Panel position="top-left" className="bg-white p-2 rounded-lg shadow-md border border-slate-200 flex gap-2 flex-wrap">
+          <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider py-1 px-2 w-full">Add Node:</div>
           <button 
             onClick={() => addNode('condition')}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 rounded hover:bg-orange-100 border border-orange-200 text-xs font-medium transition-colors"
@@ -229,6 +247,27 @@ export const LogicEditor: React.FC<LogicEditorProps> = ({
           >
             <Zap size={14} />
             Action
+          </button>
+          <button 
+            onClick={() => addNode('and')}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 border border-blue-200 text-xs font-medium transition-colors"
+          >
+            <GitBranch size={14} />
+            AND
+          </button>
+          <button 
+            onClick={() => addNode('or')}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-600 rounded hover:bg-green-100 border border-green-200 text-xs font-medium transition-colors"
+          >
+            <GitBranch size={14} />
+            OR
+          </button>
+          <button 
+            onClick={() => addNode('not')}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 rounded hover:bg-red-100 border border-red-200 text-xs font-medium transition-colors"
+          >
+            <GitBranch size={14} />
+            NOT
           </button>
         </Panel>
       </ReactFlow>

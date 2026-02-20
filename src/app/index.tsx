@@ -43,6 +43,10 @@ function FormBuilderPage() {
   const [activeSectionId, setActiveSectionId] = useState<string | null>('sec_1');
   const [isLogicOpen, setIsLogicOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [showHowToUse, setShowHowToUse] = useState(() => {
+    const stored = localStorage.getItem('hideHowToUse');
+    return stored !== 'true';
+  });
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -155,15 +159,31 @@ function FormBuilderPage() {
               />
               
               <div className="absolute bottom-6 left-6 right-6 pointer-events-none">
-                <div className="bg-white/90 backdrop-blur border border-slate-200 p-4 rounded-xl shadow-lg text-xs text-slate-500">
-                  <p className="font-medium text-slate-800 mb-1">How to use:</p>
-                  <ul className="list-disc list-inside space-y-1">
-                    <li>Drag nodes to rearrange sections</li>
-                    <li>Add <strong>Condition Nodes</strong> to branch logic based on answers</li>
-                    <li>Add <strong>Action Nodes</strong> to redirect or trigger webhooks</li>
-                    <li>Connect nodes to define the flow</li>
-                  </ul>
-                </div>
+                {showHowToUse && (
+                  <div className="bg-white/90 backdrop-blur border border-slate-200 p-4 rounded-xl shadow-lg text-xs text-slate-500 pointer-events-auto">
+                    <div className="flex justify-between items-start gap-3">
+                      <div className="flex-1">
+                        <p className="font-medium text-slate-800 mb-1">How to use:</p>
+                        <ul className="list-disc list-inside space-y-1">
+                          <li>Drag nodes to rearrange sections</li>
+                          <li>Add <strong>Condition Nodes</strong> to branch logic based on answers</li>
+                          <li>Add <strong>Action Nodes</strong> to redirect or trigger webhooks</li>
+                          <li>Connect nodes to define the flow</li>
+                        </ul>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setShowHowToUse(false);
+                          localStorage.setItem('hideHowToUse', 'true');
+                        }}
+                        className="p-1 hover:bg-slate-200 rounded text-slate-400 hover:text-slate-600 transition-colors flex-shrink-0 mt-0.5"
+                        title="Close"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
