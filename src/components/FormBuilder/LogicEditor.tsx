@@ -158,6 +158,13 @@ export const LogicEditor: React.FC<LogicEditorProps> = ({
     [setEdges],
   );
 
+  const onEdgeClick = useCallback(
+    (_: React.MouseEvent, edge: Edge) => {
+      setEdges((eds) => eds.filter((e) => e.id !== edge.id));
+    },
+    [setEdges],
+  );
+
   const addNode = (type: 'condition' | 'action' | 'and' | 'or' | 'not') => {
     const id = `${type}_${Date.now()}`;
     const position = { x: 400, y: 100 };
@@ -216,6 +223,7 @@ export const LogicEditor: React.FC<LogicEditorProps> = ({
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onEdgeClick={onEdgeClick}
         onNodeClick={(_, node) => {
           if (node.type === 'sectionNode') {
             onSectionSelect(node.id);
