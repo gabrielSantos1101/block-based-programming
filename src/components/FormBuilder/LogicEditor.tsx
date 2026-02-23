@@ -42,10 +42,10 @@ const SectionNode = memo(({ data, selected }: NodeProps) => {
   
   return (
     <div className={`
-      bg-white rounded-lg border-2 shadow-sm min-w-[200px] overflow-hidden transition-colors
+      bg-white rounded-lg border-2 shadow-sm min-w-[250px] overflow-hidden transition-colors
       ${selected ? 'border-indigo-500 ring-2 ring-indigo-500/20' : 'border-slate-200'}
     `}>
-      <Handle type="target" position={Position.Left} className="!bg-slate-400 !w-3 !h-3" />
+      <Handle type="target" position={Position.Top} className="bg-slate-400! w-3! h-3!" />
       
       <div className="bg-slate-50 border-b border-slate-100 p-3">
         <h3 className="font-semibold text-slate-800 text-sm">{label}</h3>
@@ -68,7 +68,7 @@ const SectionNode = memo(({ data, selected }: NodeProps) => {
         )}
       </div>
 
-      <Handle type="source" position={Position.Right} className="!bg-indigo-500 !w-3 !h-3" />
+      <Handle type="source" position={Position.Bottom} className="bg-indigo-500! w-3! h-3!" />
     </div>
   );
 });
@@ -115,7 +115,7 @@ export const LogicEditor: React.FC<LogicEditorProps> = ({
           id: section.id,
           type: 'sectionNode',
           data: newNodeData,
-          position: { x: 100, y: index * 250 + 50 },
+          position: { x: 50, y: index * 300 },
         };
       });
 
@@ -135,6 +135,31 @@ export const LogicEditor: React.FC<LogicEditorProps> = ({
       return [...newSectionNodes, ...updatedOtherNodes];
     });
   }, [sections, setNodes]);
+
+  useEffect(() => {
+    setEdges((eds) => {
+      const sectionEdges = sections.map((section, index) => {
+        if (index < sections.length - 1) {
+          return {
+            id: `edge_${section.id}_${sections[index + 1].id}`,
+            source: section.id,
+            target: sections[index + 1].id,
+            animated: true,
+            style: { stroke: '#94a3b8', strokeWidth: 2 },
+            markerEnd: {
+              type: MarkerType.ArrowClosed,
+              color: '#94a3b8',
+            },
+          } as Edge;
+        }
+        return null;
+      }).filter((edge): edge is Edge => edge !== null);
+
+      const otherEdges = eds.filter(e => !sections.some(s => e.source === s.id && sections.some(s2 => e.target === s2.id)));
+      
+      return [...sectionEdges, ...otherEdges];
+    });
+  }, [sections, setEdges]);
 
   useEffect(() => {
     setNodes((nds) => 
