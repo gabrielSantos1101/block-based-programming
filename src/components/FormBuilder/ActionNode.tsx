@@ -1,7 +1,7 @@
-import { memo } from 'react';
-import { Handle, Position, useReactFlow } from '@xyflow/react';
 import type { NodeProps } from '@xyflow/react';
-import { Globe, Zap, Trash2 } from 'lucide-react';
+import { Handle, Position, useReactFlow } from '@xyflow/react';
+import { Globe, Trash2, Zap } from 'lucide-react';
+import { memo } from 'react';
 import type { ActionConfig } from '@/types';
 
 interface ActionNodeData {
@@ -19,29 +19,35 @@ export const ActionNode = memo(({ id, data, selected }: NodeProps) => {
 
   const handleUpdateConfig = (field: keyof ActionConfig, value: string) => {
     updateNodeData(id, {
-      actionConfig: { ...actionConfig, [field]: value }
+      actionConfig: { ...actionConfig, [field]: value },
     });
   };
 
   const isRedirect = actionConfig?.type === 'redirect';
 
   return (
-    <div className={`
+    <div
+      className={`
       bg-white rounded-lg border-2 shadow-lg min-w-[250px] overflow-hidden transition-all
       ${selected ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-slate-200'}
-    `}>
+    `}
+    >
       <Handle type="target" position={Position.Left} className="!bg-slate-400 !w-3 !h-3" />
-      
-      <div className={`
+
+      <div
+        className={`
         border-b p-3 flex justify-between items-center
         ${isRedirect ? 'bg-emerald-50 border-emerald-100' : 'bg-purple-50 border-purple-100'}
-      `}>
-        <h3 className={`font-semibold text-sm flex items-center gap-2 ${isRedirect ? 'text-emerald-800' : 'text-purple-800'}`}>
+      `}
+      >
+        <h3
+          className={`font-semibold text-sm flex items-center gap-2 ${isRedirect ? 'text-emerald-800' : 'text-purple-800'}`}
+        >
           {isRedirect ? <Globe size={16} /> : <Zap size={16} />}
           {isRedirect ? 'Redirect URL' : 'Trigger Action'}
         </h3>
         <div className="flex items-center gap-2">
-          <select 
+          <select
             className="text-[10px] bg-white border border-slate-200 rounded px-1 py-0.5"
             value={actionConfig?.type || 'redirect'}
             onChange={(e) => handleUpdateConfig('type', e.target.value)}
@@ -49,7 +55,7 @@ export const ActionNode = memo(({ id, data, selected }: NodeProps) => {
             <option value="redirect">Redirect</option>
             <option value="webhook">Webhook</option>
           </select>
-          <button 
+          <button
             onClick={(e) => {
               e.stopPropagation();
               handleDeleteNode();
@@ -61,13 +67,13 @@ export const ActionNode = memo(({ id, data, selected }: NodeProps) => {
           </button>
         </div>
       </div>
-      
+
       <div className="p-3 space-y-3">
         {isRedirect ? (
           <div>
             <label className="block text-xs font-medium text-slate-500 mb-1">Destination URL</label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               className="text-xs w-full p-2 rounded border border-slate-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
               placeholder="https://example.com/success"
               value={actionConfig?.url || ''}
@@ -76,9 +82,11 @@ export const ActionNode = memo(({ id, data, selected }: NodeProps) => {
           </div>
         ) : (
           <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1">Webhook / Action ID</label>
-            <input 
-              type="text" 
+            <label className="block text-xs font-medium text-slate-500 mb-1">
+              Webhook / Action ID
+            </label>
+            <input
+              type="text"
               className="text-xs w-full p-2 rounded border border-slate-300 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none"
               placeholder="user_register_v1"
               value={actionConfig?.message || ''}

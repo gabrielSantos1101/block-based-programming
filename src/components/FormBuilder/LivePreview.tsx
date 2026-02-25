@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import type { Edge, Node } from '@xyflow/react';
+import { AlertCircle, ArrowRight, Globe, Zap } from 'lucide-react';
 import { motion } from 'motion/react';
-import { ArrowRight, AlertCircle, Globe, Zap } from 'lucide-react';
-import type { Node, Edge } from '@xyflow/react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 import type { ActionConfig, ConditionRule, FormSection } from '@/types';
 
 const STORAGE_KEY = 'livePreviewFlow';
@@ -41,7 +42,11 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
-          const parsed = JSON.parse(saved) as { sections?: FormSection[]; nodes?: Node[]; edges?: Edge[] };
+          const parsed = JSON.parse(saved) as {
+            sections?: FormSection[];
+            nodes?: Node[];
+            edges?: Edge[];
+          };
           if (parsed.sections?.length) setLoadedSections(parsed.sections);
           if (parsed.nodes?.length) setLoadedNodes(parsed.nodes);
           if (parsed.edges?.length) setLoadedEdges(parsed.edges);
@@ -65,10 +70,10 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
     }
   }, [loadedSections, currentSectionId, loading]);
 
-  const currentSection = loadedSections.find(s => s.id === currentSectionId);
+  const currentSection = loadedSections.find((s) => s.id === currentSectionId);
 
   const handleInputChange = (fieldId: string, value: string) => {
-    setFormValues(prev => ({ ...prev, [fieldId]: value }));
+    setFormValues((prev) => ({ ...prev, [fieldId]: value }));
   };
 
   const checkCondition = (rule: ConditionRule): boolean => {
@@ -102,11 +107,11 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
   const handleNext = () => {
     if (!currentSectionId) return;
 
-    const currentNode = loadedNodes.find(n => n.id === currentSectionId);
+    const currentNode = loadedNodes.find((n) => n.id === currentSectionId);
     if (!currentNode) {
-      const currentIndex = loadedSections.findIndex(s => s.id === currentSectionId);
+      const currentIndex = loadedSections.findIndex((s) => s.id === currentSectionId);
       if (currentIndex < loadedSections.length - 1) {
-        setHistory(prev => [...prev, currentSectionId]);
+        setHistory((prev) => [...prev, currentSectionId]);
         setCurrentSectionId(loadedSections[currentIndex + 1].id);
       } else {
         setActionResult({ type: 'redirect', message: 'End of form (Default)' });
@@ -114,15 +119,15 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
       return;
     }
 
-    const outgoingEdges = loadedEdges.filter(e => e.source === currentNode.id);
-    
+    const outgoingEdges = loadedEdges.filter((e) => e.source === currentNode.id);
+
     if (outgoingEdges.length === 0) {
-       setActionResult({ type: 'redirect', message: 'End of form (No path)' });
-       return;
+      setActionResult({ type: 'redirect', message: 'End of form (No path)' });
+      return;
     }
 
     const edge = outgoingEdges[0];
-    const targetNode = loadedNodes.find(n => n.id === edge.target);
+    const targetNode = loadedNodes.find((n) => n.id === edge.target);
 
     if (!targetNode) return;
 
@@ -131,14 +136,14 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
 
   const processNode = (node: Node) => {
     if (node.type === 'sectionNode') {
-      setHistory(prev => [...prev, currentSectionId!]);
+      setHistory((prev) => [...prev, currentSectionId!]);
       setCurrentSectionId(node.id);
     } else if (node.type === 'actionNode') {
       const actionConfig = (node.data as any).actionConfig as ActionConfig;
       setActionResult(actionConfig);
     } else if (node.type === 'conditionNode') {
       const rules = (node.data as any).rules as ConditionRule[];
-      
+
       let matchedRuleId: string | null = null;
 
       for (const rule of rules) {
@@ -148,34 +153,34 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
         }
       }
 
-      const conditionEdges = loadedEdges.filter(e => e.source === node.id);
-      
+      const conditionEdges = loadedEdges.filter((e) => e.source === node.id);
+
       let nextEdge: Edge | undefined;
-      
+
       if (matchedRuleId) {
-        nextEdge = conditionEdges.find(e => e.sourceHandle === matchedRuleId);
+        nextEdge = conditionEdges.find((e) => e.sourceHandle === matchedRuleId);
       }
-      
+
       if (!nextEdge) {
-        nextEdge = conditionEdges.find(e => e.sourceHandle === 'else');
+        nextEdge = conditionEdges.find((e) => e.sourceHandle === 'else');
       }
 
       if (nextEdge) {
-        const nextNode = loadedNodes.find(n => n.id === nextEdge.target);
+        const nextNode = loadedNodes.find((n) => n.id === nextEdge.target);
         if (nextNode) {
           processNode(nextNode);
         } else {
-           setActionResult({ type: 'redirect', message: 'Dead end' });
+          setActionResult({ type: 'redirect', message: 'Dead end' });
         }
       } else {
-         setActionResult({ type: 'redirect', message: 'No matching condition path' });
+        setActionResult({ type: 'redirect', message: 'No matching condition path' });
       }
     }
   };
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
@@ -199,16 +204,20 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
             </div>
           ) : actionResult ? (
             <div className="text-center py-12 space-y-4">
-              <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center ${actionResult.type === 'redirect' ? 'bg-emerald-100 text-emerald-600' : 'bg-purple-100 text-purple-600'}`}>
+              <div
+                className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center ${actionResult.type === 'redirect' ? 'bg-emerald-100 text-emerald-600' : 'bg-purple-100 text-purple-600'}`}
+              >
                 {actionResult.type === 'redirect' ? <Globe size={32} /> : <Zap size={32} />}
               </div>
               <h3 className="text-xl font-bold text-slate-900">
                 {actionResult.type === 'redirect' ? 'Redirecting...' : 'Action Triggered!'}
               </h3>
               <p className="text-slate-500">
-                {actionResult.type === 'redirect' ? `Destination: ${actionResult.url}` : `Webhook: ${actionResult.message}`}
+                {actionResult.type === 'redirect'
+                  ? `Destination: ${actionResult.url}`
+                  : `Webhook: ${actionResult.message}`}
               </p>
-              <button 
+              <button
                 onClick={onClose}
                 className="mt-6 px-6 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors"
               >
@@ -223,15 +232,15 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
               </div>
 
               <div className="space-y-5">
-                {currentSection.fields.map(field => (
+                {currentSection.fields.map((field) => (
                   <div key={field.id} className="space-y-1.5">
                     <label className="block text-sm font-medium text-slate-700">
                       {field.label} {field.required && <span className="text-red-500">*</span>}
                     </label>
-                    
+
                     {field.type === 'text' && (
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         className="w-full rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500"
                         value={formValues[field.id] || ''}
                         onChange={(e) => handleInputChange(field.id, e.target.value)}
@@ -239,24 +248,29 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
                     )}
 
                     {field.type === 'select' && (
-                      <select 
+                      <select
                         className="w-full rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500"
                         value={formValues[field.id] || ''}
                         onChange={(e) => handleInputChange(field.id, e.target.value)}
                       >
                         <option value="">Select...</option>
-                        {field.options?.map(opt => (
-                          <option key={opt} value={opt}>{opt}</option>
+                        {field.options?.map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
                         ))}
                       </select>
                     )}
 
                     {field.type === 'radio' && (
                       <div className="space-y-2">
-                        {field.options?.map(opt => (
-                          <label key={opt} className="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors">
-                            <input 
-                              type="radio" 
+                        {field.options?.map((opt) => (
+                          <label
+                            key={opt}
+                            className="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors"
+                          >
+                            <input
+                              type="radio"
                               name={field.id}
                               value={opt}
                               checked={formValues[field.id] === opt}
@@ -279,7 +293,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
 
         {!actionResult && (
           <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
-            <button 
+            <button
               onClick={handleNext}
               disabled={loading}
               className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"

@@ -1,6 +1,6 @@
+import { Handle, type NodeProps, Position, useReactFlow } from '@xyflow/react';
+import { Plus, Trash2, X } from 'lucide-react';
 import { memo } from 'react';
-import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react';
-import { Trash2, Plus, X } from 'lucide-react';
 
 interface LogicalOperatorNodeData {
   label: string;
@@ -18,7 +18,7 @@ const operatorConfig = {
     ringColor: 'ring-blue-500/20',
     selectedBorder: 'border-blue-500',
     handleColor: '!bg-blue-500',
-    description: 'All inputs must be true'
+    description: 'All inputs must be true',
   },
   OR: {
     color: 'green',
@@ -29,7 +29,7 @@ const operatorConfig = {
     ringColor: 'ring-green-500/20',
     selectedBorder: 'border-green-500',
     handleColor: '!bg-green-500',
-    description: 'At least one input must be true'
+    description: 'At least one input must be true',
   },
   NOT: {
     color: 'red',
@@ -40,8 +40,8 @@ const operatorConfig = {
     ringColor: 'ring-red-500/20',
     selectedBorder: 'border-red-500',
     handleColor: '!bg-red-500',
-    description: 'Inverts the input (true becomes false, false becomes true)'
-  }
+    description: 'Inverts the input (true becomes false, false becomes true)',
+  },
 };
 
 export const LogicalOperatorNode = memo(({ id, data, selected }: NodeProps) => {
@@ -71,22 +71,30 @@ export const LogicalOperatorNode = memo(({ id, data, selected }: NodeProps) => {
   };
 
   return (
-    <div className={`
+    <div
+      className={`
       bg-white rounded-lg border-2 shadow-lg min-w-[280px] overflow-hidden transition-all group
       ${selected ? `${config.selectedBorder} ring-2 ${config.ringColor}` : 'border-slate-200'}
-    `}>
-      <Handle type="target" position={Position.Top} className="bg-slate-400! w-3! h-3! hover:bg-slate-600! transition-colors" />
-      
-      <div className={`${config.bgColor} border-b ${config.borderColor} p-3 flex justify-between items-center`}>
+    `}
+    >
+      <Handle
+        type="target"
+        position={Position.Top}
+        className="bg-slate-400! w-3! h-3! hover:bg-slate-600! transition-colors"
+      />
+
+      <div
+        className={`${config.bgColor} border-b ${config.borderColor} p-3 flex justify-between items-center`}
+      >
         <div className="flex items-center gap-2">
-          <span className={`text-xs font-bold ${config.textColor} bg-white px-2 py-1 rounded border ${config.borderColor}`}>
+          <span
+            className={`text-xs font-bold ${config.textColor} bg-white px-2 py-1 rounded border ${config.borderColor}`}
+          >
             {operator}
           </span>
-          <h3 className={`font-semibold ${config.textColor} text-sm`}>
-            Logical Operator
-          </h3>
+          <h3 className={`font-semibold ${config.textColor} text-sm`}>Logical Operator</h3>
         </div>
-        <button 
+        <button
           onClick={(e) => {
             e.stopPropagation();
             handleDeleteNode();
@@ -97,7 +105,7 @@ export const LogicalOperatorNode = memo(({ id, data, selected }: NodeProps) => {
           <Trash2 size={14} />
         </button>
       </div>
-      
+
       <div className="p-3 space-y-3">
         <div className="flex gap-1.5">
           {(['AND', 'OR', 'NOT'] as const).map((op) => (
@@ -115,7 +123,9 @@ export const LogicalOperatorNode = memo(({ id, data, selected }: NodeProps) => {
           ))}
         </div>
 
-        <div className={`text-xs ${config.textColor} bg-white p-2 rounded border ${config.borderColor} italic`}>
+        <div
+          className={`text-xs ${config.textColor} bg-white p-2 rounded border ${config.borderColor} italic`}
+        >
           {config.description}
         </div>
 
@@ -132,9 +142,7 @@ export const LogicalOperatorNode = memo(({ id, data, selected }: NodeProps) => {
                   id={`input_${index}`}
                   className={`${config.handleColor.replace('!', '')}! w-3! h-3!`}
                 />
-                <span className="text-xs text-slate-500 flex-1">
-                  Input {index + 1}
-                </span>
+                <span className="text-xs text-slate-500 flex-1">Input {index + 1}</span>
               </div>
             ))}
           </div>
@@ -164,7 +172,11 @@ export const LogicalOperatorNode = memo(({ id, data, selected }: NodeProps) => {
 
       <div className="bg-slate-50 p-2 border-t border-slate-100 flex justify-end items-center relative">
         <span className="text-xs text-slate-500 mr-3 font-medium">Output</span>
-        <Handle type="source" position={Position.Right} className={`${config.handleColor.replace('!', '')}! w-3! h-3!`} />
+        <Handle
+          type="source"
+          position={Position.Right}
+          className={`${config.handleColor.replace('!', '')}! w-3! h-3!`}
+        />
       </div>
     </div>
   );

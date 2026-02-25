@@ -1,13 +1,13 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router';
+import type { Edge, Node } from '@xyflow/react';
+import { useEdgesState, useNodesState } from '@xyflow/react';
+import { Play, Save, Settings2, Share2, X } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useState } from 'react';
-import { Settings2, X, Play, Share2, Save } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
-import { useNodesState, useEdgesState } from '@xyflow/react';
-import type { Node, Edge } from '@xyflow/react';
-import type { FormSection } from '@/types';
 import { FormPreview } from '@/components/FormBuilder/FormPreview';
-import { LogicEditor } from '@/components/FormBuilder/LogicEditor';
 import { LivePreview } from '@/components/FormBuilder/LivePreview';
+import { LogicEditor } from '@/components/FormBuilder/LogicEditor';
+import type { FormSection } from '@/types';
 
 const INITIAL_SECTIONS: FormSection[] = [
   {
@@ -15,28 +15,36 @@ const INITIAL_SECTIONS: FormSection[] = [
     title: 'Welcome & Basic Info',
     fields: [
       { id: 'f_1', type: 'text', label: 'What is your name?', required: true },
-      { id: 'f_2', type: 'select', label: 'Select your department', options: ['Sales', 'Engineering', 'Support'] }
-    ]
+      {
+        id: 'f_2',
+        type: 'select',
+        label: 'Select your department',
+        options: ['Sales', 'Engineering', 'Support'],
+      },
+    ],
   },
   {
     id: 'sec_2',
     title: 'Engineering Details',
     fields: [
-      { id: 'f_3', type: 'radio', label: 'Primary Language', options: ['TypeScript', 'Python', 'Rust'] }
-    ]
+      {
+        id: 'f_3',
+        type: 'radio',
+        label: 'Primary Language',
+        options: ['TypeScript', 'Python', 'Rust'],
+      },
+    ],
   },
   {
     id: 'sec_3',
     title: 'Sales Targets',
-    fields: [
-      { id: 'f_4', type: 'text', label: 'Monthly Target ($)' }
-    ]
-  }
+    fields: [{ id: 'f_4', type: 'text', label: 'Monthly Target ($)' }],
+  },
 ];
 
 export const Route = createFileRoute('/')({
   component: FormBuilderPage,
-})
+});
 
 function FormBuilderPage() {
   const STORAGE_KEY = 'livePreviewFlow';
@@ -52,13 +60,16 @@ function FormBuilderPage() {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
-  // Carrega do localStorage no mount para repovoar canvas e preview.
   useEffect(() => {
     if (typeof window === 'undefined') return;
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (!saved) return;
-      const parsed = JSON.parse(saved) as { sections?: FormSection[]; nodes?: Node[]; edges?: Edge[] };
+      const parsed = JSON.parse(saved) as {
+        sections?: FormSection[];
+        nodes?: Node[];
+        edges?: Edge[];
+      };
       if (parsed.sections?.length) {
         setSections(parsed.sections);
         setActiveSectionId(parsed.sections[0]?.id ?? null);
@@ -68,7 +79,7 @@ function FormBuilderPage() {
     } catch (err) {
       console.warn('Falha ao carregar dados salvos', err);
     }
-  }, []);
+  }, [setEdges, setNodes]);
 
   const handleSave = () => {
     if (typeof window === 'undefined') return;
@@ -82,20 +93,21 @@ function FormBuilderPage() {
 
   const handleAddSection = () => {
     const newId = `sec_${sections.length + 1}`;
-    setSections([...sections, {
-      id: newId,
-      title: 'New Section',
-      fields: []
-    }]);
+    setSections([
+      ...sections,
+      {
+        id: newId,
+        title: 'New Section',
+        fields: [],
+      },
+    ]);
     setActiveSectionId(newId);
 
-    // liga nova seção à anterior automaticamente
     const prevId = sections[sections.length - 1]?.id;
     if (prevId) {
       setEdges((eds) => {
         const edgeId = `edge_${prevId}_${newId}`;
-        // evita duplicar caso já exista
-        if (eds.some(e => e.id === edgeId)) return eds;
+        if (eds.some((e) => e.id === edgeId)) return eds;
         return [
           ...eds,
           {
@@ -104,27 +116,32 @@ function FormBuilderPage() {
             target: newId,
             animated: true,
             style: { stroke: '#94a3b8', strokeWidth: 2 },
-            markerEnd: { type: 'arrowclosed', color: '#94a3b8' }
-          } as Edge
+            markerEnd: { type: 'arrowclosed', color: '#94a3b8' },
+          } as Edge,
         ];
       });
     }
   };
 
   const handleAddField = (sectionId: string) => {
-    setSections(sections.map(sec => {
-      if (sec.id === sectionId) {
-        return {
-          ...sec,
-          fields: [...sec.fields, {
-            id: `f_${Date.now()}`,
-            type: 'text',
-            label: 'New Question'
-          }]
-        };
-      }
-      return sec;
-    }));
+    setSections(
+      sections.map((sec) => {
+        if (sec.id === sectionId) {
+          return {
+            ...sec,
+            fields: [
+              ...sec.fields,
+              {
+                id: `f_${Date.now()}`,
+                type: 'text',
+                label: 'New Question',
+              },
+            ],
+          };
+        }
+        return sec;
+      }),
+    );
   };
 
   return (
@@ -139,21 +156,23 @@ function FormBuilderPage() {
             </div>
             <span className="font-bold text-slate-800 tracking-tight">LogicFlow Builder</span>
           </div>
-          
+
           <div className="flex items-center gap-3">
-             <button 
+            <button
               onClick={() => setIsLogicOpen(!isLogicOpen)}
               className={`
                 flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors
-                ${isLogicOpen 
-                  ? 'bg-indigo-100 text-indigo-700' 
-                  : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'}
+                ${
+                  isLogicOpen
+                    ? 'bg-indigo-100 text-indigo-700'
+                    : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                }
               `}
             >
               <Settings2 size={16} />
               {isLogicOpen ? 'Close Logic' : 'Logic Flow'}
             </button>
-            <button 
+            <button
               onClick={() => setIsPreviewOpen(true)}
               className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm"
             >
@@ -182,7 +201,7 @@ function FormBuilderPage() {
 
       <AnimatePresence mode="wait">
         {isLogicOpen && (
-          <motion.div 
+          <motion.div
             initial={{ width: 0, opacity: 0 }}
             animate={{ width: '60%', opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
@@ -194,17 +213,17 @@ function FormBuilderPage() {
                 <Share2 size={16} className="text-indigo-500" />
                 Logic Flow
               </h2>
-              <button 
+              <button
                 onClick={() => setIsLogicOpen(false)}
                 className="p-1 hover:bg-slate-200 rounded-full text-slate-500 transition-colors"
               >
                 <X size={18} />
               </button>
             </div>
-            
+
             <div className="flex-1 relative">
               <LogicEditor
-                sections={sections} 
+                sections={sections}
                 activeSectionId={activeSectionId}
                 onSectionSelect={setActiveSectionId}
                 nodes={nodes}
@@ -214,7 +233,7 @@ function FormBuilderPage() {
                 setNodes={setNodes}
                 setEdges={setEdges}
               />
-              
+
               <div className="absolute bottom-6 left-6 right-6 pointer-events-none">
                 {showHowToUse && (
                   <div className="bg-white/90 backdrop-blur border border-slate-200 p-4 rounded-xl shadow-lg text-xs text-slate-500 pointer-events-auto">
@@ -223,8 +242,12 @@ function FormBuilderPage() {
                         <p className="font-medium text-slate-800 mb-1">How to use:</p>
                         <ul className="list-disc list-inside space-y-1">
                           <li>Drag nodes to rearrange sections</li>
-                          <li>Add <strong>Condition Nodes</strong> to branch logic based on answers</li>
-                          <li>Add <strong>Action Nodes</strong> to redirect or trigger webhooks</li>
+                          <li>
+                            Add <strong>Condition Nodes</strong> to branch logic based on answers
+                          </li>
+                          <li>
+                            Add <strong>Action Nodes</strong> to redirect or trigger webhooks
+                          </li>
                           <li>Connect nodes to define the flow</li>
                         </ul>
                       </div>

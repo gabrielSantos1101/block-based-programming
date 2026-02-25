@@ -1,4 +1,3 @@
-
 export type FieldType = 'text' | 'select' | 'radio' | 'checkbox';
 
 export interface FormField {
@@ -26,7 +25,16 @@ export type LogicNodeType = 'section' | 'condition' | 'action';
 export interface ConditionRule {
   id: string;
   fieldId: string;
-  operator: 'equals' | 'not_equals' | 'contains' | 'greater_than' | 'less_than' | 'greater_equal' | 'less_equal' | 'is_empty' | 'is_not_empty';
+  operator:
+    | 'equals'
+    | 'not_equals'
+    | 'contains'
+    | 'greater_than'
+    | 'less_than'
+    | 'greater_equal'
+    | 'less_equal'
+    | 'is_empty'
+    | 'is_not_empty';
   value: string;
 }
 
