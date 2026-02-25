@@ -138,6 +138,9 @@ export const LogicEditor: React.FC<LogicEditorProps> = ({
 
   useEffect(() => {
     setEdges((eds) => {
+      // Se já há arestas salvas (ex.: carregadas do localStorage), não sobrescreve.
+      if (eds.length > 0) return eds;
+
       const sectionEdges = sections.map((section, index) => {
         if (index < sections.length - 1) {
           return {

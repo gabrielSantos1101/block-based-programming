@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react';
-import { Settings2, X, Play, Share2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Settings2, X, Play, Share2, Save } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNodesState, useEdgesState } from '@xyflow/react';
 import type { Node, Edge } from '@xyflow/react';
@@ -39,6 +39,7 @@ export const Route = createFileRoute('/')({
 })
 
 function FormBuilderPage() {
+  const STORAGE_KEY = 'livePreviewFlow';
   const [sections, setSections] = useState<FormSection[]>(INITIAL_SECTIONS);
   const [activeSectionId, setActiveSectionId] = useState<string | null>('sec_1');
   const [isLogicOpen, setIsLogicOpen] = useState(false);
@@ -51,6 +52,34 @@ function FormBuilderPage() {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
+  // Carrega do localStorage no mount para repovoar canvas e preview.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return;
+      const parsed = JSON.parse(saved) as { sections?: FormSection[]; nodes?: Node[]; edges?: Edge[] };
+      if (parsed.sections?.length) {
+        setSections(parsed.sections);
+        setActiveSectionId(parsed.sections[0]?.id ?? null);
+      }
+      if (parsed.nodes?.length) setNodes(parsed.nodes);
+      if (parsed.edges?.length) setEdges(parsed.edges);
+    } catch (err) {
+      console.warn('Falha ao carregar dados salvos', err);
+    }
+  }, []);
+
+  const handleSave = () => {
+    if (typeof window === 'undefined') return;
+    try {
+      const payload = { sections, nodes, edges };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch (err) {
+      console.warn('Falha ao salvar fluxo', err);
+    }
+  };
+
   const handleAddSection = () => {
     const newId = `sec_${sections.length + 1}`;
     setSections([...sections, {
@@ -59,6 +88,27 @@ function FormBuilderPage() {
       fields: []
     }]);
     setActiveSectionId(newId);
+
+    // liga nova seção à anterior automaticamente
+    const prevId = sections[sections.length - 1]?.id;
+    if (prevId) {
+      setEdges((eds) => {
+        const edgeId = `edge_${prevId}_${newId}`;
+        // evita duplicar caso já exista
+        if (eds.some(e => e.id === edgeId)) return eds;
+        return [
+          ...eds,
+          {
+            id: edgeId,
+            source: prevId,
+            target: newId,
+            animated: true,
+            style: { stroke: '#94a3b8', strokeWidth: 2 },
+            markerEnd: { type: 'arrowclosed', color: '#94a3b8' }
+          } as Edge
+        ];
+      });
+    }
   };
 
   const handleAddField = (sectionId: string) => {
@@ -109,6 +159,13 @@ function FormBuilderPage() {
             >
               <Play size={16} />
               Preview
+            </button>
+            <button
+              onClick={handleSave}
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors shadow-sm"
+            >
+              <Save size={16} />
+              Salvar
             </button>
           </div>
         </header>
