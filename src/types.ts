@@ -1,4 +1,4 @@
-export type FieldType = 'text' | 'select' | 'radio' | 'checkbox';
+export type FieldType = 'text' | 'long_text' | 'select' | 'radio' | 'checkbox' | 'rating';
 
 export interface FormField {
   id: string;
@@ -6,6 +6,7 @@ export interface FormField {
   label: string;
   options?: string[];
   required?: boolean;
+  ratingScale?: number;
 }
 
 export interface FormSection {

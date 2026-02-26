@@ -21,6 +21,12 @@ const INITIAL_SECTIONS: FormSection[] = [
         label: 'Select your department',
         options: ['Sales', 'Engineering', 'Support'],
       },
+      {
+        id: 'f_2b',
+        type: 'checkbox',
+        label: 'Interests',
+        options: ['UI', 'APIs', 'Data'],
+      },
     ],
   },
   {
@@ -33,12 +39,16 @@ const INITIAL_SECTIONS: FormSection[] = [
         label: 'Primary Language',
         options: ['TypeScript', 'Python', 'Rust'],
       },
+      { id: 'f_5', type: 'rating', label: 'Code quality self-score', ratingScale: 7 },
     ],
   },
   {
     id: 'sec_3',
     title: 'Sales Targets',
-    fields: [{ id: 'f_4', type: 'text', label: 'Monthly Target ($)' }],
+    fields: [
+      { id: 'f_4', type: 'text', label: 'Monthly Target ($)' },
+      { id: 'f_6', type: 'long_text', label: 'Any notes?' },
+    ],
   },
 ];
 
@@ -144,6 +154,43 @@ function FormBuilderPage() {
     );
   };
 
+  const handleUpdateField = (
+    sectionId: string,
+    fieldId: string,
+    updates: Partial<FormSection['fields'][number]>,
+  ) => {
+    setSections((prev) =>
+      prev.map((sec) => {
+        if (sec.id !== sectionId) return sec;
+        return {
+          ...sec,
+          fields: sec.fields.map((f) =>
+            f.id === fieldId
+              ? {
+                  ...f,
+                  ...updates,
+                  // reset option-based data when type changes
+                  ...(updates.type === 'select' || updates.type === 'radio' || updates.type === 'checkbox'
+                    ? { options: f.options ?? ['Option 1'] }
+                    : {}),
+                  ...(updates.type === 'rating' ? { ratingScale: updates.ratingScale ?? 5 } : {}),
+                }
+              : f,
+          ),
+        };
+      }),
+    );
+  };
+
+  const handleRemoveField = (sectionId: string, fieldId: string) => {
+    setSections((prev) =>
+      prev.map((sec) => {
+        if (sec.id !== sectionId) return sec;
+        return { ...sec, fields: sec.fields.filter((f) => f.id !== fieldId) };
+      }),
+    );
+  };
+
   return (
     <div className="flex h-screen w-full overflow-hidden bg-slate-100">
       {/* Main Content Area (Form Builder) */}
@@ -199,6 +246,8 @@ function FormBuilderPage() {
           onSectionSelect={setActiveSectionId}
           onAddSection={handleAddSection}
           onAddField={handleAddField}
+          onUpdateField={handleUpdateField}
+          onRemoveField={handleRemoveField}
         />
       </div>
 

@@ -3,6 +3,11 @@ import { motion } from 'motion/react';
 import type React from 'react';
 import { cn } from '@/lib/utils';
 import type { FormSection } from '@/types';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
 
 interface FormPreviewProps {
   sections: FormSection[];
@@ -10,6 +15,12 @@ interface FormPreviewProps {
   onSectionSelect: (id: string | null) => void;
   onAddSection: () => void;
   onAddField: (sectionId: string) => void;
+  onUpdateField: (
+    sectionId: string,
+    fieldId: string,
+    updates: Partial<FormSection['fields'][number]>,
+  ) => void;
+  onRemoveField: (sectionId: string, fieldId: string) => void;
 }
 
 export const FormPreview: React.FC<FormPreviewProps> = ({
@@ -18,7 +29,129 @@ export const FormPreview: React.FC<FormPreviewProps> = ({
   onSectionSelect,
   onAddSection,
   onAddField,
+  onUpdateField,
+  onRemoveField,
 }) => {
+  const renderFieldControls = (sectionId: string, field: FormSection['fields'][number]) => {
+    const isOptionBased = field.type === 'select' || field.type === 'radio' || field.type === 'checkbox';
+    return (
+      <div className="space-y-3">
+        <div className="flex gap-3 flex-wrap">
+          <Input
+            value={field.label}
+            onChange={(e) => onUpdateField(sectionId, field.id, { label: e.target.value })}
+            className="flex-1 min-w-[200px]"
+            placeholder="Question text"
+          />
+
+          <Select
+            value={field.type}
+            onValueChange={(value) =>
+              onUpdateField(sectionId, field.id, {
+                type: value as any,
+                ratingScale: value === 'rating' ? 5 : field.ratingScale,
+              })
+            }
+          >
+            <SelectTrigger className="w-[170px]">
+              <SelectValue placeholder="Tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="text">Short text</SelectItem>
+              <SelectItem value="long_text">Long text</SelectItem>
+              <SelectItem value="select">Dropdown</SelectItem>
+              <SelectItem value="radio">Single choice (radio)</SelectItem>
+              <SelectItem value="checkbox">Multiple choice (checkbox)</SelectItem>
+              <SelectItem value="rating">Rating</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <label className="flex items-center gap-2 text-sm text-slate-600">
+            <Checkbox
+              checked={!!field.required}
+              onCheckedChange={(checked) =>
+                onUpdateField(sectionId, field.id, { required: checked === true })
+              }
+            />
+            Required
+          </label>
+
+          <button
+            onClick={() => onRemoveField(sectionId, field.id)}
+            className="text-slate-400 hover:text-red-500 transition-colors"
+            title="Remove field"
+            type="button"
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
+
+        {field.type === 'long_text' && (
+          <Textarea disabled placeholder="Long answer..." className="min-h-[90px]" />
+        )}
+
+        {field.type === 'text' && <Input disabled placeholder="Short answer..." />}
+
+        {field.type === 'rating' && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs text-slate-500">
+              <span>Scale</span>
+              <span>{field.ratingScale ?? 5} points</span>
+            </div>
+            <Slider
+              min={4}
+              max={10}
+              step={1}
+              value={[field.ratingScale ?? 5]}
+              onValueChange={(val) => onUpdateField(sectionId, field.id, { ratingScale: val[0] })}
+            />
+          </div>
+        )}
+
+        {isOptionBased && (
+          <div className="space-y-2">
+            {(field.options ?? []).map((opt, idx) => (
+              <div key={opt + idx} className="flex items-center gap-2">
+                <Input
+                  value={opt}
+                  onChange={(e) => {
+                    const newOpts = [...(field.options ?? [])];
+                    newOpts[idx] = e.target.value;
+                    onUpdateField(sectionId, field.id, { options: newOpts });
+                  }}
+                  className="flex-1"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newOpts = (field.options ?? []).filter((_, i) => i !== idx);
+                    onUpdateField(sectionId, field.id, { options: newOpts });
+                  }}
+                  className="text-slate-400 hover:text-red-500 transition-colors"
+                  title="Remove option"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={() => {
+                const count = (field.options?.length ?? 0) + 1;
+                const newOpts = [...(field.options ?? []), `Option ${count}`];
+                onUpdateField(sectionId, field.id, { options: newOpts });
+              }}
+              className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+            >
+              + Add option
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="flex-1 bg-slate-50 h-full overflow-y-auto p-8 font-sans">
       <div className="max-w-3xl mx-auto space-y-8">
@@ -33,11 +166,11 @@ export const FormPreview: React.FC<FormPreviewProps> = ({
           <motion.div
             key={section.id}
             layoutId={section.id}
-            onClick={() => onSectionSelect(section.id)}
-            className={cn(
-              'relative group rounded-xl border-2 transition-all duration-200 p-6 bg-white shadow-sm',
-              activeSectionId === section.id
-                ? 'border-indigo-500 ring-4 ring-indigo-500/10'
+              onClick={() => onSectionSelect(section.id)}
+              className={cn(
+                'relative group rounded-xl border-2 transition-all duration-200 p-6 bg-white shadow-sm',
+                activeSectionId === section.id
+                  ? 'border-indigo-500 ring-4 ring-indigo-500/10'
                 : 'border-slate-200 hover:border-slate-300',
             )}
           >
@@ -58,59 +191,21 @@ export const FormPreview: React.FC<FormPreviewProps> = ({
               </div>
             </div>
 
-            <div className="space-y-4">
-              {section.fields.map((field) => (
-                <div
-                  key={field.id}
-                  className="p-4 rounded-lg bg-slate-50 border border-slate-200 group/field hover:border-slate-300 transition-colors"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <label className="block text-sm font-medium text-slate-700">
-                      {field.label}
-                    </label>
-                    <button className="text-slate-400 hover:text-red-500 opacity-0 group-hover/field:opacity-100 transition-opacity">
-                      <Trash2 size={16} />
-                    </button>
+              <div className="space-y-4">
+                {section.fields.map((field) => (
+                  <div
+                    key={field.id}
+                    className="p-4 rounded-lg bg-slate-50 border border-slate-200 group/field hover:border-slate-300 transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {renderFieldControls(section.id, field)}
                   </div>
+                ))}
 
-                  {field.type === 'text' && (
-                    <input
-                      disabled
-                      type="text"
-                      className="w-full rounded-md border-slate-300 bg-white shadow-sm disabled:bg-slate-100 disabled:cursor-not-allowed"
-                      placeholder="Text answer..."
-                    />
-                  )}
-
-                  {field.type === 'select' && (
-                    <select
-                      disabled
-                      className="w-full rounded-md border-slate-300 bg-white shadow-sm disabled:bg-slate-100 disabled:cursor-not-allowed"
-                    >
-                      <option>Select an option...</option>
-                      {field.options?.map((opt) => (
-                        <option key={opt}>{opt}</option>
-                      ))}
-                    </select>
-                  )}
-
-                  {field.type === 'radio' && (
-                    <div className="space-y-2">
-                      {field.options?.map((opt) => (
-                        <div key={opt} className="flex items-center gap-2">
-                          <div className="w-4 h-4 rounded-full border border-slate-300 bg-white"></div>
-                          <span className="text-sm text-slate-600">{opt}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAddField(section.id);
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAddField(section.id);
                 }}
                 className="w-full py-3 border-2 border-dashed border-slate-200 rounded-lg text-slate-400 hover:border-indigo-500 hover:text-indigo-500 hover:bg-indigo-50 transition-all flex items-center justify-center gap-2 font-medium"
               >

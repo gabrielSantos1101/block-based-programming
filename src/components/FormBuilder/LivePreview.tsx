@@ -4,7 +4,12 @@ import { motion } from 'motion/react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
-import type { ActionConfig, ConditionRule, FormSection } from '@/types';
+import type { ActionConfig, ConditionRule, FormSection, FormField } from '@/types';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Slider } from '@/components/ui/slider';
 
 const STORAGE_KEY = 'livePreviewFlow';
 
@@ -23,9 +28,116 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
   const [loadedEdges, setLoadedEdges] = useState<Edge[]>(edges);
   const [loading, setLoading] = useState(true);
   const [currentSectionId, setCurrentSectionId] = useState<string | null>(null);
-  const [formValues, setFormValues] = useState<Record<string, string>>({});
+  const [formValues, setFormValues] = useState<Record<string, string | string[]>>({});
   const [_, setHistory] = useState<string[]>([]);
   const [actionResult, setActionResult] = useState<ActionConfig | null>(null);
+
+  const renderField = (field: FormField) => {
+    const value = formValues[field.id];
+
+    if (field.type === 'text') {
+      return (
+        <Input
+          type="text"
+          className="w-full rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500"
+          value={(value as string) ?? ''}
+          onChange={(e) => handleInputChange(field.id, e.target.value)}
+        />
+      );
+    }
+
+    if (field.type === 'long_text') {
+      return (
+        <Textarea
+          className="w-full rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500"
+          value={(value as string) ?? ''}
+          onChange={(e) => handleInputChange(field.id, e.target.value)}
+        />
+      );
+    }
+
+    if (field.type === 'select') {
+      return (
+        <select
+          className="w-full rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500"
+          value={(value as string) ?? ''}
+          onChange={(e) => handleInputChange(field.id, e.target.value)}
+        >
+          <option value="">Select...</option>
+          {field.options?.map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
+        </select>
+      );
+    }
+
+    if (field.type === 'radio') {
+      return (
+        <RadioGroup
+          value={(value as string) ?? ''}
+          onValueChange={(val) => handleInputChange(field.id, val)}
+          className="space-y-2"
+        >
+          {field.options?.map((opt) => (
+            <label
+              key={opt}
+              className="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors"
+            >
+              <RadioGroupItem value={opt} />
+              <span className="text-sm text-slate-700">{opt}</span>
+            </label>
+          ))}
+        </RadioGroup>
+      );
+    }
+
+    if (field.type === 'checkbox') {
+      const arr = Array.isArray(value) ? value : [];
+      return (
+        <div className="space-y-2">
+          {field.options?.map((opt) => {
+            const checked = arr.includes(opt);
+            return (
+              <label
+                key={opt}
+                className="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors"
+              >
+                <Checkbox
+                  checked={checked}
+                  onCheckedChange={(val) => {
+                    const next = val ? [...arr, opt] : arr.filter((o) => o !== opt);
+                    handleInputChange(field.id, next);
+                  }}
+                />
+                <span className="text-sm text-slate-700">{opt}</span>
+              </label>
+            );
+          })}
+        </div>
+      );
+    }
+
+    if (field.type === 'rating') {
+      const current = Number(value ?? 0) || 0;
+      const max = field.ratingScale ?? 5;
+      return (
+        <div className="space-y-2">
+          <Slider
+            min={1}
+            max={max}
+            step={1}
+            value={[current || Math.ceil(max / 2)]}
+            onValueChange={(val) => handleInputChange(field.id, String(val[0]))}
+          />
+          <div className="text-xs text-slate-500">Selected: {current || Math.ceil(max / 2)} / {max}</div>
+        </div>
+      );
+    }
+
+    return null;
+  };
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -70,7 +182,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
 
   const currentSection = loadedSections.find((s) => s.id === currentSectionId);
 
-  const handleInputChange = (fieldId: string, value: string) => {
+  const handleInputChange = (fieldId: string, value: string | string[]) => {
     setFormValues((prev) => ({ ...prev, [fieldId]: value }));
   };
 
@@ -78,25 +190,37 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
     const fieldValue = formValues[rule.fieldId];
     if (fieldValue === undefined) return false;
 
+    const valueAsString = Array.isArray(fieldValue) ? fieldValue.join(',') : fieldValue;
+
     switch (rule.operator) {
       case 'equals':
-        return fieldValue === rule.value;
+        return Array.isArray(fieldValue)
+          ? fieldValue.includes(rule.value)
+          : valueAsString === rule.value;
       case 'not_equals':
-        return fieldValue !== rule.value;
+        return Array.isArray(fieldValue)
+          ? !fieldValue.includes(rule.value)
+          : valueAsString !== rule.value;
       case 'contains':
-        return fieldValue.includes(rule.value);
+        return Array.isArray(fieldValue)
+          ? fieldValue.includes(rule.value)
+          : valueAsString.includes(rule.value);
       case 'greater_than':
-        return Number(fieldValue) > Number(rule.value);
+        return Number(valueAsString) > Number(rule.value);
       case 'less_than':
-        return Number(fieldValue) < Number(rule.value);
+        return Number(valueAsString) < Number(rule.value);
       case 'greater_equal':
-        return Number(fieldValue) >= Number(rule.value);
+        return Number(valueAsString) >= Number(rule.value);
       case 'less_equal':
-        return Number(fieldValue) <= Number(rule.value);
+        return Number(valueAsString) <= Number(rule.value);
       case 'is_empty':
-        return fieldValue.trim() === '';
+        return Array.isArray(fieldValue)
+          ? fieldValue.length === 0
+          : valueAsString.trim() === '';
       case 'is_not_empty':
-        return fieldValue.trim() !== '';
+        return Array.isArray(fieldValue)
+          ? fieldValue.length > 0
+          : valueAsString.trim() !== '';
       default:
         return false;
     }
@@ -240,51 +364,8 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
                   <div key={field.id} className="space-y-1.5">
                     <label className="block text-sm font-medium text-slate-700">
                       {field.label} {field.required && <span className="text-red-500">*</span>}
-                      {field.type === 'text' && (
-                        <input
-                          type="text"
-                          className="w-full rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500"
-                          value={formValues[field.id] || ''}
-                          onChange={(e) => handleInputChange(field.id, e.target.value)}
-                        />
-                      )}
                     </label>
-
-                    {field.type === 'select' && (
-                      <select
-                        className="w-full rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500"
-                        value={formValues[field.id] || ''}
-                        onChange={(e) => handleInputChange(field.id, e.target.value)}
-                      >
-                        <option value="">Select...</option>
-                        {field.options?.map((opt) => (
-                          <option key={opt} value={opt}>
-                            {opt}
-                          </option>
-                        ))}
-                      </select>
-                    )}
-
-                    {field.type === 'radio' && (
-                      <div className="space-y-2">
-                        {field.options?.map((opt) => (
-                          <label
-                            key={opt}
-                            className="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors"
-                          >
-                            <input
-                              type="radio"
-                              name={field.id}
-                              value={opt}
-                              checked={formValues[field.id] === opt}
-                              onChange={(e) => handleInputChange(field.id, e.target.value)}
-                              className="text-indigo-600 focus:ring-indigo-500 border-slate-300"
-                            />
-                            <span className="text-sm text-slate-700">{opt}</span>
-                          </label>
-                        ))}
-                      </div>
-                    )}
+                    {renderField(field)}
                   </div>
                 ))}
               </div>
