@@ -7,7 +7,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
+import { DatePickerInput } from '@/components/ui/date-pick-input';
+import { TimePickerInput } from '@/components/ui/time-pick-input';
 
 interface FormPreviewProps {
   sections: FormSection[];
@@ -63,6 +64,8 @@ export const FormPreview: React.FC<FormPreviewProps> = ({
               <SelectItem value="radio">Single choice (radio)</SelectItem>
               <SelectItem value="checkbox">Multiple choice (checkbox)</SelectItem>
               <SelectItem value="rating">Rating</SelectItem>
+              <SelectItem value="date">Date</SelectItem>
+              <SelectItem value="time">Time</SelectItem>
             </SelectContent>
           </Select>
 
@@ -91,20 +94,54 @@ export const FormPreview: React.FC<FormPreviewProps> = ({
         )}
 
         {field.type === 'text' && <Input disabled placeholder="Short answer..." />}
+        {field.type === 'date' && <DatePickerInput disabled label="Date" placeholder="Pick a date" />}
+        {field.type === 'time' && <TimePickerInput disabled label="Time" placeholder="HH:MM" />}
 
         {field.type === 'rating' && (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs text-slate-500">
-              <span>Scale</span>
-              <span>{field.ratingScale ?? 5} points</span>
+          <div className="space-y-3">
+            <div className="flex gap-2 flex-wrap">
+              <Select
+                value={String(field.ratingScale ?? 5)}
+                onValueChange={(val) => onUpdateField(sectionId, field.id, { ratingScale: Number(val) })}
+              >
+                <SelectTrigger className="w-[110px]">
+                  <SelectValue placeholder="Scale" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[4, 5, 6, 7, 8, 9, 10].map((n) => (
+                    <SelectItem key={n} value={String(n)}>
+                      {n} points
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={field.ratingIcon ?? 'star'}
+                onValueChange={(val) => onUpdateField(sectionId, field.id, { ratingIcon: val as any })}
+              >
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Icon" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="radio">Circle</SelectItem>
+                  <SelectItem value="star">Star</SelectItem>
+                  <SelectItem value="heart">Heart</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <Slider
-              min={4}
-              max={10}
-              step={1}
-              value={[field.ratingScale ?? 5]}
-              onValueChange={(val) => onUpdateField(sectionId, field.id, { ratingScale: val[0] })}
-            />
+
+            <div className="flex gap-3 items-center">
+              {Array.from({ length: field.ratingScale ?? 5 }, (_, i) => (
+                <span key={i} className="text-slate-500 text-lg">
+                  {field.ratingIcon === 'heart'
+                    ? '❤'
+                    : field.ratingIcon === 'radio'
+                      ? '◯'
+                      : '★'}
+                </span>
+              ))}
+            </div>
           </div>
         )}
 

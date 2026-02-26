@@ -39,7 +39,9 @@ const INITIAL_SECTIONS: FormSection[] = [
         label: 'Primary Language',
         options: ['TypeScript', 'Python', 'Rust'],
       },
-      { id: 'f_5', type: 'rating', label: 'Code quality self-score', ratingScale: 7 },
+      { id: 'f_5', type: 'rating', label: 'Code quality self-score', ratingScale: 7, ratingIcon: 'star' },
+      { id: 'f_7', type: 'date', label: 'Preferred start date' },
+      { id: 'f_8', type: 'time', label: 'Daily standup time' },
     ],
   },
   {

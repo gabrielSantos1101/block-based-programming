@@ -1,4 +1,12 @@
-export type FieldType = 'text' | 'long_text' | 'select' | 'radio' | 'checkbox' | 'rating';
+export type FieldType =
+  | 'text'
+  | 'long_text'
+  | 'select'
+  | 'radio'
+  | 'checkbox'
+  | 'rating'
+  | 'date'
+  | 'time';
 
 export interface FormField {
   id: string;
@@ -7,6 +15,7 @@ export interface FormField {
   options?: string[];
   required?: boolean;
   ratingScale?: number;
+  ratingIcon?: 'radio' | 'star' | 'heart';
 }
 
 export interface FormSection {

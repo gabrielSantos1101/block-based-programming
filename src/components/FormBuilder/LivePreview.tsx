@@ -1,5 +1,5 @@
 import type { Edge, Node } from '@xyflow/react';
-import { AlertCircle, ArrowRight, Globe, Zap } from 'lucide-react';
+import { AlertCircle, ArrowRight, Globe, Heart, Star, Zap } from 'lucide-react';
 import { motion } from 'motion/react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
@@ -9,7 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Slider } from '@/components/ui/slider';
+import { DatePickerInput } from '@/components/ui/date-pick-input';
+import { TimePickerInput } from '@/components/ui/time-pick-input';
 
 const STORAGE_KEY = 'livePreviewFlow';
 
@@ -42,6 +43,26 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
           className="w-full rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500"
           value={(value as string) ?? ''}
           onChange={(e) => handleInputChange(field.id, e.target.value)}
+        />
+      );
+    }
+
+    if (field.type === 'date') {
+      return (
+        <DatePickerInput
+          label="Date"
+          value={(value as string) ?? ''}
+          onChange={(val) => handleInputChange(field.id, val)}
+        />
+      );
+    }
+
+    if (field.type === 'time') {
+      return (
+        <TimePickerInput
+          label="Time"
+          value={(value as string) ?? ''}
+          onChange={(val) => handleInputChange(field.id, val)}
         />
       );
     }
@@ -120,18 +141,36 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
     }
 
     if (field.type === 'rating') {
-      const current = Number(value ?? 0) || 0;
       const max = field.ratingScale ?? 5;
+      const current = Number(value ?? 0) || 0;
+      const icon = field.ratingIcon ?? 'star';
+
+      const renderIcon = (filled: boolean) => {
+        if (icon === 'heart') return <Heart size={18} className={filled ? 'fill-current' : ''} />;
+        if (icon === 'radio') return <span className="text-sm">{filled ? '◉' : '◯'}</span>;
+        return <Star size={18} className={filled ? 'fill-current' : ''} />;
+      };
+
       return (
         <div className="space-y-2">
-          <Slider
-            min={1}
-            max={max}
-            step={1}
-            value={[current || Math.ceil(max / 2)]}
-            onValueChange={(val) => handleInputChange(field.id, String(val[0]))}
-          />
-          <div className="text-xs text-slate-500">Selected: {current || Math.ceil(max / 2)} / {max}</div>
+          <div className="flex gap-3 flex-wrap">
+            {Array.from({ length: max }, (_, idx) => {
+              const val = idx + 1;
+              const filled = current === val;
+              return (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => handleInputChange(field.id, String(val))}
+                  className="flex items-center gap-1 text-slate-600 hover:text-indigo-600"
+                >
+                  {renderIcon(filled)}
+                  <span className="text-xs">{val}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="text-xs text-slate-500">Selected: {current || '-'} / {max}</div>
         </div>
       );
     }
