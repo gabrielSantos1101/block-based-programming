@@ -1,6 +1,7 @@
 import { Handle, type NodeProps, Position, useReactFlow } from '@xyflow/react';
 import { Plus, Trash2, X } from 'lucide-react';
-import { memo } from 'react';
+import { memo, useId } from 'react';
+import { cn } from '@/lib/utils';
 
 interface LogicalOperatorNodeData {
   label: string;
@@ -72,10 +73,10 @@ export const LogicalOperatorNode = memo(({ id, data, selected }: NodeProps) => {
 
   return (
     <div
-      className={`
-      bg-white rounded-lg border-2 shadow-lg min-w-[280px] overflow-hidden transition-all group
-      ${selected ? `${config.selectedBorder} ring-2 ${config.ringColor}` : 'border-slate-200'}
-    `}
+      className={cn(
+        'bg-white rounded-lg border-2 shadow-lg min-w-[280px] overflow-hidden transition-all group border-slate-200',
+        selected && [config.selectedBorder, 'ring-2', config.ringColor],
+      )}
     >
       <Handle
         type="target"
@@ -84,22 +85,34 @@ export const LogicalOperatorNode = memo(({ id, data, selected }: NodeProps) => {
       />
 
       <div
-        className={`${config.bgColor} border-b ${config.borderColor} p-3 flex justify-between items-center`}
+        className={cn(
+          config.bgColor,
+          'border-b',
+          config.borderColor,
+          'p-3 flex justify-between items-center',
+        )}
       >
         <div className="flex items-center gap-2">
           <span
-            className={`text-xs font-bold ${config.textColor} bg-white px-2 py-1 rounded border ${config.borderColor}`}
+            className={cn(
+              'text-xs font-bold bg-white px-2 py-1 rounded border',
+              config.textColor,
+              config.borderColor,
+            )}
           >
             {operator}
           </span>
-          <h3 className={`font-semibold ${config.textColor} text-sm`}>Logical Operator</h3>
+          <h3 className={cn('font-semibold text-sm', config.textColor)}>Logical Operator</h3>
         </div>
         <button
           onClick={(e) => {
             e.stopPropagation();
             handleDeleteNode();
           }}
-          className={`p-1 ${config.hoverBg} rounded text-slate-400 hover:text-red-600 transition-colors`}
+          className={cn(
+            'p-1 rounded text-slate-400 hover:text-red-600 transition-colors',
+            config.hoverBg,
+          )}
           title="Delete Block"
         >
           <Trash2 size={14} />
@@ -112,11 +125,12 @@ export const LogicalOperatorNode = memo(({ id, data, selected }: NodeProps) => {
             <button
               key={op}
               onClick={() => handleChangeOperator(op)}
-              className={`flex-1 py-1.5 text-xs font-semibold rounded border transition-all ${
+              className={cn(
+                'flex-1 py-1.5 text-xs font-semibold rounded border transition-all',
                 operator === op
-                  ? `${config.bgColor} ${config.borderColor} ${config.textColor}`
-                  : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200'
-              }`}
+                  ? [config.bgColor, config.borderColor, config.textColor]
+                  : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200',
+              )}
             >
               {op}
             </button>
@@ -124,7 +138,11 @@ export const LogicalOperatorNode = memo(({ id, data, selected }: NodeProps) => {
         </div>
 
         <div
-          className={`text-xs ${config.textColor} bg-white p-2 rounded border ${config.borderColor} italic`}
+          className={cn(
+            'text-xs bg-white p-2 rounded border italic',
+            config.textColor,
+            config.borderColor,
+          )}
         >
           {config.description}
         </div>
@@ -135,12 +153,12 @@ export const LogicalOperatorNode = memo(({ id, data, selected }: NodeProps) => {
           </div>
           <div className="space-y-1.5">
             {Array.from({ length: inputs }).map((_, index) => (
-              <div key={index} className="flex items-center gap-2">
+              <div key={crypto.randomUUID()} className="flex items-center gap-2">
                 <Handle
                   type="target"
                   position={Position.Left}
                   id={`input_${index}`}
-                  className={`${config.handleColor.replace('!', '')}! w-3! h-3!`}
+                  className={cn(config.handleColor.replace('!', '') + '!', 'w-3! h-3!')}
                 />
                 <span className="text-xs text-slate-500 flex-1">Input {index + 1}</span>
               </div>
@@ -175,7 +193,7 @@ export const LogicalOperatorNode = memo(({ id, data, selected }: NodeProps) => {
         <Handle
           type="source"
           position={Position.Right}
-          className={`${config.handleColor.replace('!', '')}! w-3! h-3!`}
+          className={cn(config.handleColor.replace('!', '') + '!', 'w-3! h-3!')}
         />
       </div>
     </div>

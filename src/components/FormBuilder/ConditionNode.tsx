@@ -1,6 +1,7 @@
 import { Handle, type NodeProps, Position, useReactFlow } from '@xyflow/react';
 import { Plus, Trash2, X } from 'lucide-react';
-import { memo } from 'react';
+import { memo, useId } from 'react';
+import { cn } from '@/lib/utils';
 import type { ConditionRule, FormSection } from '@/types';
 
 interface ConditionNodeData {
@@ -11,7 +12,7 @@ interface ConditionNodeData {
 }
 
 export const ConditionNode = memo(({ id, data, selected }: NodeProps) => {
-  const { rules = [], availableSections = [], onUpdate } = data as unknown as ConditionNodeData;
+  const { rules = [], availableSections = [] } = data as unknown as ConditionNodeData;
   const { updateNodeData, deleteElements } = useReactFlow();
 
   const handleDeleteNode = () => {
@@ -39,15 +40,15 @@ export const ConditionNode = memo(({ id, data, selected }: NodeProps) => {
   };
 
   const allFields = availableSections.flatMap((s) =>
-    s.fields.map((f) => ({ ...f, sectionTitle: s.title })),
+    s.fields.map((f) => ({ ...f, sectionTitle: s.title }))
   );
 
   return (
     <div
-      className={`
-      bg-white rounded-lg border-2 shadow-lg min-w-[300px] overflow-hidden transition-all group
-      ${selected ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-slate-200'}
-    `}
+      className={cn(
+        'bg-white rounded-lg border-2 shadow-lg min-w-[300px] overflow-hidden transition-all group',
+        selected ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-slate-200',
+      )}
     >
       <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
         <div className="bg-slate-800 text-white text-[10px] py-1 px-2 rounded shadow-sm whitespace-nowrap">
@@ -157,7 +158,7 @@ export const ConditionNode = memo(({ id, data, selected }: NodeProps) => {
         <Handle
           type="source"
           position={Position.Right}
-          id="else"
+          id={useId()}
           className="!bg-slate-400 !w-3 !h-3"
         />
       </div>

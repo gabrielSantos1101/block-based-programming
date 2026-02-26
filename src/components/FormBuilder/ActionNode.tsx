@@ -2,6 +2,7 @@ import type { NodeProps } from '@xyflow/react';
 import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { Globe, Trash2, Zap } from 'lucide-react';
 import { memo } from 'react';
+import { cn } from '@/lib/utils';
 import type { ActionConfig } from '@/types';
 
 interface ActionNodeData {
@@ -27,21 +28,24 @@ export const ActionNode = memo(({ id, data, selected }: NodeProps) => {
 
   return (
     <div
-      className={`
-      bg-white rounded-lg border-2 shadow-lg min-w-[250px] overflow-hidden transition-all
-      ${selected ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-slate-200'}
-    `}
+      className={cn(
+        'bg-white rounded-lg border-2 shadow-lg min-w-[250px] overflow-hidden transition-all',
+        selected ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-slate-200',
+      )}
     >
       <Handle type="target" position={Position.Left} className="!bg-slate-400 !w-3 !h-3" />
 
       <div
-        className={`
-        border-b p-3 flex justify-between items-center
-        ${isRedirect ? 'bg-emerald-50 border-emerald-100' : 'bg-purple-50 border-purple-100'}
-      `}
+        className={cn(
+          'border-b p-3 flex justify-between items-center',
+          isRedirect ? 'bg-emerald-50 border-emerald-100' : 'bg-purple-50 border-purple-100',
+        )}
       >
         <h3
-          className={`font-semibold text-sm flex items-center gap-2 ${isRedirect ? 'text-emerald-800' : 'text-purple-800'}`}
+          className={cn(
+            'font-semibold text-sm flex items-center gap-2',
+            isRedirect ? 'text-emerald-800' : 'text-purple-800',
+          )}
         >
           {isRedirect ? <Globe size={16} /> : <Zap size={16} />}
           {isRedirect ? 'Redirect URL' : 'Trigger Action'}
@@ -60,7 +64,12 @@ export const ActionNode = memo(({ id, data, selected }: NodeProps) => {
               e.stopPropagation();
               handleDeleteNode();
             }}
-            className={`p-1 rounded transition-colors ${isRedirect ? 'hover:bg-emerald-200 text-emerald-400 hover:text-emerald-700' : 'hover:bg-purple-200 text-purple-400 hover:text-purple-700'}`}
+            className={cn(
+              'p-1 rounded transition-colors',
+              isRedirect
+                ? 'hover:bg-emerald-200 text-emerald-400 hover:text-emerald-700'
+                : 'hover:bg-purple-200 text-purple-400 hover:text-purple-700',
+            )}
             title="Delete Block"
           >
             <Trash2 size={14} />

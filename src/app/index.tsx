@@ -140,7 +140,7 @@ function FormBuilderPage() {
           };
         }
         return sec;
-      }),
+      })
     );
   };
 
@@ -168,6 +168,7 @@ function FormBuilderPage() {
                     : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
                 }
               `}
+              type="button"
             >
               <Settings2 size={16} />
               {isLogicOpen ? 'Close Logic' : 'Logic Flow'}
@@ -175,6 +176,7 @@ function FormBuilderPage() {
             <button
               onClick={() => setIsPreviewOpen(true)}
               className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm"
+              type="button"
             >
               <Play size={16} />
               Preview
@@ -182,6 +184,7 @@ function FormBuilderPage() {
             <button
               onClick={handleSave}
               className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors shadow-sm"
+              type="button"
             >
               <Save size={16} />
               Salvar
@@ -216,6 +219,7 @@ function FormBuilderPage() {
               <button
                 onClick={() => setIsLogicOpen(false)}
                 className="p-1 hover:bg-slate-200 rounded-full text-slate-500 transition-colors"
+                type="button"
               >
                 <X size={18} />
               </button>
@@ -258,6 +262,7 @@ function FormBuilderPage() {
                         }}
                         className="p-1 hover:bg-slate-200 rounded text-slate-400 hover:text-slate-600 transition-colors flex-shrink-0 mt-0.5"
                         title="Close"
+                        type="button"
                       >
                         <X size={16} />
                       </button>

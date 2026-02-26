@@ -3,6 +3,7 @@ import { AlertCircle, ArrowRight, Globe, Zap } from 'lucide-react';
 import { motion } from 'motion/react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
 import type { ActionConfig, ConditionRule, FormSection } from '@/types';
 
 const STORAGE_KEY = 'livePreviewFlow';
@@ -23,18 +24,16 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
   const [loading, setLoading] = useState(true);
   const [currentSectionId, setCurrentSectionId] = useState<string | null>(null);
   const [formValues, setFormValues] = useState<Record<string, string>>({});
-  const [history, setHistory] = useState<string[]>([]);
+  const [_, setHistory] = useState<string[]>([]);
   const [actionResult, setActionResult] = useState<ActionConfig | null>(null);
 
-  // Persist incoming graph/sections whenever they change.
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (!sections.length && !nodes.length && !edges.length) return; // evita sobrescrever com vazio
+    if (!sections.length && !nodes.length && !edges.length) return;
     const payload = { sections, nodes, edges };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
   }, [sections, nodes, edges]);
 
-  // Simulate fetching from an endpoint with variable latency; hydrate from localStorage if present.
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -51,7 +50,6 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
           if (parsed.nodes?.length) setLoadedNodes(parsed.nodes);
           if (parsed.edges?.length) setLoadedEdges(parsed.edges);
         } else if (sections.length || nodes.length || edges.length) {
-          // Seed storage on first load
           localStorage.setItem(STORAGE_KEY, JSON.stringify({ sections, nodes, edges }));
         }
       } catch (err) {
@@ -62,7 +60,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
     }, randomLatency());
 
     return () => clearTimeout(timer);
-  }, []); // roda apenas no mount
+  }, []);
 
   useEffect(() => {
     if (!loading && loadedSections.length > 0 && !currentSectionId) {
@@ -191,7 +189,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
             Live Preview
           </h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600" type="button">
             <AlertCircle size={20} />
           </button>
         </div>
@@ -205,7 +203,12 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
           ) : actionResult ? (
             <div className="text-center py-12 space-y-4">
               <div
-                className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center ${actionResult.type === 'redirect' ? 'bg-emerald-100 text-emerald-600' : 'bg-purple-100 text-purple-600'}`}
+                className={cn(
+                  'w-16 h-16 mx-auto rounded-full flex items-center justify-center',
+                  actionResult.type === 'redirect'
+                    ? 'bg-emerald-100 text-emerald-600'
+                    : 'bg-purple-100 text-purple-600',
+                )}
               >
                 {actionResult.type === 'redirect' ? <Globe size={32} /> : <Zap size={32} />}
               </div>
@@ -220,6 +223,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
               <button
                 onClick={onClose}
                 className="mt-6 px-6 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors"
+                type="button"
               >
                 Close Preview
               </button>
@@ -236,16 +240,15 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
                   <div key={field.id} className="space-y-1.5">
                     <label className="block text-sm font-medium text-slate-700">
                       {field.label} {field.required && <span className="text-red-500">*</span>}
+                      {field.type === 'text' && (
+                        <input
+                          type="text"
+                          className="w-full rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500"
+                          value={formValues[field.id] || ''}
+                          onChange={(e) => handleInputChange(field.id, e.target.value)}
+                        />
+                      )}
                     </label>
-
-                    {field.type === 'text' && (
-                      <input
-                        type="text"
-                        className="w-full rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500"
-                        value={formValues[field.id] || ''}
-                        onChange={(e) => handleInputChange(field.id, e.target.value)}
-                      />
-                    )}
 
                     {field.type === 'select' && (
                       <select
@@ -297,6 +300,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
               onClick={handleNext}
               disabled={loading}
               className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+              type="button"
             >
               Next Step
               <ArrowRight size={18} />

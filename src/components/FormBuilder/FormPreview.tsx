@@ -1,6 +1,7 @@
 import { GripVertical, Plus, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import type React from 'react';
+import { cn } from '@/lib/utils';
 import type { FormSection } from '@/types';
 
 interface FormPreviewProps {
@@ -33,14 +34,12 @@ export const FormPreview: React.FC<FormPreviewProps> = ({
             key={section.id}
             layoutId={section.id}
             onClick={() => onSectionSelect(section.id)}
-            className={`
-              relative group rounded-xl border-2 transition-all duration-200 p-6 bg-white shadow-sm
-              ${
-                activeSectionId === section.id
-                  ? 'border-indigo-500 ring-4 ring-indigo-500/10'
-                  : 'border-slate-200 hover:border-slate-300'
-              }
-            `}
+            className={cn(
+              'relative group rounded-xl border-2 transition-all duration-200 p-6 bg-white shadow-sm',
+              activeSectionId === section.id
+                ? 'border-indigo-500 ring-4 ring-indigo-500/10'
+                : 'border-slate-200 hover:border-slate-300',
+            )}
           >
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">

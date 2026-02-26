@@ -22,6 +22,7 @@ import { memo, useCallback, useEffect, useMemo } from 'react';
 import '@xyflow/react/dist/style.css';
 import { GitBranch, Split, Zap } from 'lucide-react';
 import type { FormField, FormSection } from '@/types';
+import { cn } from '@/lib/utils';
 import { ActionNode } from './ActionNode';
 import { ConditionNode } from './ConditionNode';
 import { LogicalOperatorNode } from './LogicalOperatorNode';
@@ -43,10 +44,10 @@ const SectionNode = memo(({ data, selected }: NodeProps) => {
 
   return (
     <div
-      className={`
-      bg-white rounded-lg border-2 shadow-sm min-w-[250px] overflow-hidden transition-colors
-      ${selected ? 'border-indigo-500 ring-2 ring-indigo-500/20' : 'border-slate-200'}
-    `}
+      className={cn(
+        'bg-white rounded-lg border-2 shadow-sm min-w-[250px] overflow-hidden transition-colors',
+        selected ? 'border-indigo-500 ring-2 ring-indigo-500/20' : 'border-slate-200',
+      )}
     >
       <Handle type="target" position={Position.Top} className="bg-slate-400! w-3! h-3!" />
 
