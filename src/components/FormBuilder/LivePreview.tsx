@@ -1,18 +1,23 @@
-import type { Edge, Node } from '@xyflow/react';
-import { AlertCircle, ArrowRight, Globe, Heart, Star, Zap } from 'lucide-react';
-import { motion } from 'motion/react';
-import type React from 'react';
-import { useEffect, useState } from 'react';
-import { cn } from '@/lib/utils';
-import type { ActionConfig, ConditionRule, FormSection, FormField } from '@/types';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { DatePickerInput } from '@/components/ui/date-pick-input';
-import { TimePickerInput } from '@/components/ui/time-pick-input';
+import type { Edge, Node } from "@xyflow/react";
+import { AlertCircle, ArrowRight, Globe, Heart, Star, Zap } from "lucide-react";
+import { motion } from "motion/react";
+import type React from "react";
+import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
+import type {
+  ActionConfig,
+  ConditionRule,
+  FormSection,
+  FormField,
+} from "@/types";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { DatePickerInput } from "@/components/ui/date-pick-input";
+import { TimePickerInput } from "@/components/ui/time-pick-input";
 
-const STORAGE_KEY = 'livePreviewFlow';
+const STORAGE_KEY = "livePreviewFlow";
 
 const randomLatency = () => Math.floor(200 + Math.random() * 1200); // 200ms to ~1.4s
 
@@ -23,65 +28,72 @@ interface LivePreviewProps {
   onClose: () => void;
 }
 
-export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges, onClose }) => {
+export const LivePreview: React.FC<LivePreviewProps> = ({
+  sections,
+  nodes,
+  edges,
+  onClose,
+}) => {
   const [loadedSections, setLoadedSections] = useState<FormSection[]>(sections);
   const [loadedNodes, setLoadedNodes] = useState<Node[]>(nodes);
   const [loadedEdges, setLoadedEdges] = useState<Edge[]>(edges);
   const [loading, setLoading] = useState(true);
   const [currentSectionId, setCurrentSectionId] = useState<string | null>(null);
-  const [formValues, setFormValues] = useState<Record<string, string | string[]>>({});
+  const [formValues, setFormValues] = useState<
+    Record<string, string | string[]>
+  >({});
   const [_, setHistory] = useState<string[]>([]);
   const [actionResult, setActionResult] = useState<ActionConfig | null>(null);
 
   const renderField = (field: FormField) => {
     const value = formValues[field.id];
 
-    if (field.type === 'text') {
+    if (field.type === "text") {
       return (
         <Input
           type="text"
-          className="w-full rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500"
-          value={(value as string) ?? ''}
+          className="w-full rounded-lg border-slate-300 focus:border-primary focus:ring-primary"
+          value={(value as string) ?? ""}
           onChange={(e) => handleInputChange(field.id, e.target.value)}
         />
       );
     }
 
-    if (field.type === 'date') {
+    if (field.type === "date") {
       return (
         <DatePickerInput
           label="Date"
-          value={(value as string) ?? ''}
+          value={(value as string) ?? ""}
           onChange={(val) => handleInputChange(field.id, val)}
         />
       );
     }
 
-    if (field.type === 'time') {
+    if (field.type === "time") {
       return (
         <TimePickerInput
           label="Time"
-          value={(value as string) ?? ''}
+          value={(value as string) ?? ""}
           onChange={(val) => handleInputChange(field.id, val)}
         />
       );
     }
 
-    if (field.type === 'long_text') {
+    if (field.type === "long_text") {
       return (
         <Textarea
-          className="w-full rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500"
-          value={(value as string) ?? ''}
+          className="w-full rounded-lg border-slate-300 focus:border-primary focus:ring-primary"
+          value={(value as string) ?? ""}
           onChange={(e) => handleInputChange(field.id, e.target.value)}
         />
       );
     }
 
-    if (field.type === 'select') {
+    if (field.type === "select") {
       return (
         <select
-          className="w-full rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500"
-          value={(value as string) ?? ''}
+          className="w-full rounded-lg border-slate-300 focus:border-primary focus:ring-primary"
+          value={(value as string) ?? ""}
           onChange={(e) => handleInputChange(field.id, e.target.value)}
         >
           <option value="">Select...</option>
@@ -94,10 +106,10 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
       );
     }
 
-    if (field.type === 'radio') {
+    if (field.type === "radio") {
       return (
         <RadioGroup
-          value={(value as string) ?? ''}
+          value={(value as string) ?? ""}
           onValueChange={(val) => handleInputChange(field.id, val)}
           className="space-y-2"
         >
@@ -114,7 +126,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
       );
     }
 
-    if (field.type === 'checkbox') {
+    if (field.type === "checkbox") {
       const arr = Array.isArray(value) ? value : [];
       return (
         <div className="space-y-2">
@@ -128,7 +140,9 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
                 <Checkbox
                   checked={checked}
                   onCheckedChange={(val) => {
-                    const next = val ? [...arr, opt] : arr.filter((o) => o !== opt);
+                    const next = val
+                      ? [...arr, opt]
+                      : arr.filter((o) => o !== opt);
                     handleInputChange(field.id, next);
                   }}
                 />
@@ -140,37 +154,75 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
       );
     }
 
-    if (field.type === 'rating') {
+    if (field.type === "rating") {
       const max = field.ratingScale ?? 5;
-      const current = Number(value ?? 0) || 0;
-      const icon = field.ratingIcon ?? 'star';
+      const current = (value as string) ?? "";
+      const icon = field.ratingIcon ?? "radio";
 
       const renderIcon = (filled: boolean) => {
-        if (icon === 'heart') return <Heart size={18} className={filled ? 'fill-current' : ''} />;
-        if (icon === 'radio') return <span className="text-sm">{filled ? '◉' : '◯'}</span>;
-        return <Star size={18} className={filled ? 'fill-current' : ''} />;
+        if (icon === "heart") {
+          return (
+            <Heart
+              size={22}
+              strokeWidth={1.6}
+              className={filled ? "text-primary" : "text-slate-400"}
+              fill={filled ? "currentColor" : "none"}
+            />
+          );
+        }
+        if (icon === "radio")
+          return <span className="text-lg">{filled ? "◉" : "◯"}</span>;
+        return (
+          <Star
+            size={22}
+            strokeWidth={1.6}
+            className={filled ? "text-primary" : "text-slate-400"}
+            fill={filled ? "currentColor" : "none"}
+          />
+        );
       };
 
       return (
         <div className="space-y-2">
-          <div className="flex gap-3 flex-wrap">
+          <RadioGroup
+            value={current || "1"}
+            onValueChange={(val) => handleInputChange(field.id, val)}
+            className="flex gap-3 flex-wrap justify-evenly text-slate-600"
+          >
             {Array.from({ length: max }, (_, idx) => {
-              const val = idx + 1;
-              const filled = current === val;
+              const val = String(idx + 1);
+              const useIcon = icon === "star" || icon === "heart";
+              const selected = current === val || (!current && val === "1");
               return (
-                <button
+                <div
                   key={val}
-                  type="button"
-                  onClick={() => handleInputChange(field.id, String(val))}
-                  className="flex items-center gap-1 text-slate-600 hover:text-indigo-600"
+                  className="flex flex-col items-center gap-1 min-w-10"
                 >
-                  {renderIcon(filled)}
-                  <span className="text-xs">{val}</span>
-                </button>
+                  <label className="cursor-pointer text-slate-500 hover:text-primary transition-colors flex flex-col items-center mt-1.5">
+                    <RadioGroupItem
+                      value={val}
+                      id={`rating-preview-${field.id}-${val}`}
+                      className={cn(
+                        "data-[state=checked]:border-primary size-5",
+                        useIcon && "sr-only hidden",
+                      )}
+                    />
+
+                    {icon === "heart" && renderIcon(selected)}
+                    {icon === "star" && renderIcon(selected)}
+                    <span
+                      className={cn(
+                        "text-[0.625rem] mt-1 text-slate-500",
+                        selected && "text-primary font-medium",
+                      )}
+                    >
+                      {val}
+                    </span>
+                  </label>
+                </div>
               );
             })}
-          </div>
-          <div className="text-xs text-slate-500">Selected: {current || '-'} / {max}</div>
+          </RadioGroup>
         </div>
       );
     }
@@ -179,14 +231,14 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
   };
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     if (!sections.length && !nodes.length && !edges.length) return;
     const payload = { sections, nodes, edges };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
   }, [sections, nodes, edges]);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     const timer = setTimeout(() => {
       try {
@@ -201,10 +253,13 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
           if (parsed.nodes?.length) setLoadedNodes(parsed.nodes);
           if (parsed.edges?.length) setLoadedEdges(parsed.edges);
         } else if (sections.length || nodes.length || edges.length) {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify({ sections, nodes, edges }));
+          localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify({ sections, nodes, edges }),
+          );
         }
       } catch (err) {
-        console.warn('Failed to hydrate preview data', err);
+        console.warn("Failed to hydrate preview data", err);
       } finally {
         setLoading(false);
       }
@@ -229,37 +284,39 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
     const fieldValue = formValues[rule.fieldId];
     if (fieldValue === undefined) return false;
 
-    const valueAsString = Array.isArray(fieldValue) ? fieldValue.join(',') : fieldValue;
+    const valueAsString = Array.isArray(fieldValue)
+      ? fieldValue.join(",")
+      : fieldValue;
 
     switch (rule.operator) {
-      case 'equals':
+      case "equals":
         return Array.isArray(fieldValue)
           ? fieldValue.includes(rule.value)
           : valueAsString === rule.value;
-      case 'not_equals':
+      case "not_equals":
         return Array.isArray(fieldValue)
           ? !fieldValue.includes(rule.value)
           : valueAsString !== rule.value;
-      case 'contains':
+      case "contains":
         return Array.isArray(fieldValue)
           ? fieldValue.includes(rule.value)
           : valueAsString.includes(rule.value);
-      case 'greater_than':
+      case "greater_than":
         return Number(valueAsString) > Number(rule.value);
-      case 'less_than':
+      case "less_than":
         return Number(valueAsString) < Number(rule.value);
-      case 'greater_equal':
+      case "greater_equal":
         return Number(valueAsString) >= Number(rule.value);
-      case 'less_equal':
+      case "less_equal":
         return Number(valueAsString) <= Number(rule.value);
-      case 'is_empty':
+      case "is_empty":
         return Array.isArray(fieldValue)
           ? fieldValue.length === 0
-          : valueAsString.trim() === '';
-      case 'is_not_empty':
+          : valueAsString.trim() === "";
+      case "is_not_empty":
         return Array.isArray(fieldValue)
           ? fieldValue.length > 0
-          : valueAsString.trim() !== '';
+          : valueAsString.trim() !== "";
       default:
         return false;
     }
@@ -270,20 +327,24 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
 
     const currentNode = loadedNodes.find((n) => n.id === currentSectionId);
     if (!currentNode) {
-      const currentIndex = loadedSections.findIndex((s) => s.id === currentSectionId);
+      const currentIndex = loadedSections.findIndex(
+        (s) => s.id === currentSectionId,
+      );
       if (currentIndex < loadedSections.length - 1) {
         setHistory((prev) => [...prev, currentSectionId]);
         setCurrentSectionId(loadedSections[currentIndex + 1].id);
       } else {
-        setActionResult({ type: 'redirect', message: 'End of form (Default)' });
+        setActionResult({ type: "redirect", message: "End of form (Default)" });
       }
       return;
     }
 
-    const outgoingEdges = loadedEdges.filter((e) => e.source === currentNode.id);
+    const outgoingEdges = loadedEdges.filter(
+      (e) => e.source === currentNode.id,
+    );
 
     if (outgoingEdges.length === 0) {
-      setActionResult({ type: 'redirect', message: 'End of form (No path)' });
+      setActionResult({ type: "redirect", message: "End of form (No path)" });
       return;
     }
 
@@ -296,13 +357,13 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
   };
 
   const processNode = (node: Node) => {
-    if (node.type === 'sectionNode') {
+    if (node.type === "sectionNode") {
       setHistory((prev) => [...prev, currentSectionId!]);
       setCurrentSectionId(node.id);
-    } else if (node.type === 'actionNode') {
+    } else if (node.type === "actionNode") {
       const actionConfig = (node.data as any).actionConfig as ActionConfig;
       setActionResult(actionConfig);
-    } else if (node.type === 'conditionNode') {
+    } else if (node.type === "conditionNode") {
       const rules = (node.data as any).rules as ConditionRule[];
 
       let matchedRuleId: string | null = null;
@@ -323,7 +384,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
       }
 
       if (!nextEdge) {
-        nextEdge = conditionEdges.find((e) => e.sourceHandle === 'else');
+        nextEdge = conditionEdges.find((e) => e.sourceHandle === "else");
       }
 
       if (nextEdge) {
@@ -331,10 +392,13 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
         if (nextNode) {
           processNode(nextNode);
         } else {
-          setActionResult({ type: 'redirect', message: 'Dead end' });
+          setActionResult({ type: "redirect", message: "Dead end" });
         }
       } else {
-        setActionResult({ type: 'redirect', message: 'No matching condition path' });
+        setActionResult({
+          type: "redirect",
+          message: "No matching condition path",
+        });
       }
     }
   };
@@ -352,7 +416,11 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
             Live Preview
           </h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600" type="button">
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-600"
+            type="button"
+          >
             <AlertCircle size={20} />
           </button>
         </div>
@@ -360,26 +428,34 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
         <div className="flex-1 overflow-y-auto p-8">
           {loading ? (
             <div className="text-center py-12 space-y-4">
-              <div className="w-12 h-12 mx-auto border-4 border-indigo-100 border-t-indigo-500 rounded-full animate-spin" />
-              <p className="text-slate-600 text-sm">Simulando resposta do endpoint...</p>
+              <div className="w-12 h-12 mx-auto border-4 border-indigo-100 border-t-primary rounded-full animate-spin" />
+              <p className="text-slate-600 text-sm">
+                Simulando resposta do endpoint...
+              </p>
             </div>
           ) : actionResult ? (
             <div className="text-center py-12 space-y-4">
               <div
                 className={cn(
-                  'w-16 h-16 mx-auto rounded-full flex items-center justify-center',
-                  actionResult.type === 'redirect'
-                    ? 'bg-emerald-100 text-emerald-600'
-                    : 'bg-purple-100 text-purple-600',
+                  "w-16 h-16 mx-auto rounded-full flex items-center justify-center",
+                  actionResult.type === "redirect"
+                    ? "bg-emerald-100 text-emerald-600"
+                    : "bg-purple-100 text-purple-600",
                 )}
               >
-                {actionResult.type === 'redirect' ? <Globe size={32} /> : <Zap size={32} />}
+                {actionResult.type === "redirect" ? (
+                  <Globe size={32} />
+                ) : (
+                  <Zap size={32} />
+                )}
               </div>
               <h3 className="text-xl font-bold text-slate-900">
-                {actionResult.type === 'redirect' ? 'Redirecting...' : 'Action Triggered!'}
+                {actionResult.type === "redirect"
+                  ? "Redirecting..."
+                  : "Action Triggered!"}
               </h3>
               <p className="text-slate-500">
-                {actionResult.type === 'redirect'
+                {actionResult.type === "redirect"
                   ? `Destination: ${actionResult.url}`
                   : `Webhook: ${actionResult.message}`}
               </p>
@@ -394,15 +470,22 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
           ) : currentSection ? (
             <div className="space-y-6">
               <div className="space-y-2">
-                <h1 className="text-2xl font-bold text-slate-900">{currentSection.title}</h1>
-                <p className="text-slate-500 text-sm">Please fill out the details below.</p>
+                <h1 className="text-2xl font-bold text-slate-900">
+                  {currentSection.title}
+                </h1>
+                <p className="text-slate-500 text-sm">
+                  Please fill out the details below.
+                </p>
               </div>
 
               <div className="space-y-5">
                 {currentSection.fields.map((field) => (
                   <div key={field.id} className="space-y-1.5">
                     <label className="block text-sm font-medium text-slate-700">
-                      {field.label} {field.required && <span className="text-red-500">*</span>}
+                      {field.label}{" "}
+                      {field.required && (
+                        <span className="text-red-500">*</span>
+                      )}
                     </label>
                     {renderField(field)}
                   </div>
@@ -419,7 +502,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ sections, nodes, edges
             <button
               onClick={handleNext}
               disabled={loading}
-              className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-xl font-medium hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
               type="button"
             >
               Next Step

@@ -200,7 +200,7 @@ function FormBuilderPage() {
         {/* Header */}
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 z-10">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold">
               LF
             </div>
             <span className="font-bold text-slate-800 tracking-tight">LogicFlow Builder</span>
@@ -224,7 +224,7 @@ function FormBuilderPage() {
             </button>
             <button
               onClick={() => setIsPreviewOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm"
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm"
               type="button"
             >
               <Play size={16} />
@@ -264,7 +264,7 @@ function FormBuilderPage() {
           >
             <div className="h-14 border-b border-slate-100 flex items-center justify-between px-6 bg-slate-50/50">
               <h2 className="font-semibold text-slate-800 flex items-center gap-2">
-                <Share2 size={16} className="text-indigo-500" />
+                <Share2 size={16} className="text-primary" />
                 Logic Flow
               </h2>
               <button

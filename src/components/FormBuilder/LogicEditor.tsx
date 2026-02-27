@@ -46,7 +46,7 @@ const SectionNode = memo(({ data, selected }: NodeProps) => {
     <div
       className={cn(
         'bg-white rounded-lg border-2 shadow-sm min-w-[250px] overflow-hidden transition-colors',
-        selected ? 'border-indigo-500 ring-2 ring-indigo-500/20' : 'border-slate-200',
+        selected ? 'border-primary ring-2 ring-primary/20' : 'border-slate-200',
       )}
     >
       <Handle type="target" position={Position.Top} className="bg-slate-400! w-3! h-3!" />
@@ -68,7 +68,7 @@ const SectionNode = memo(({ data, selected }: NodeProps) => {
         )}
       </div>
 
-      <Handle type="source" position={Position.Bottom} className="bg-indigo-500! w-3! h-3!" />
+      <Handle type="source" position={Position.Bottom} className="bg-primary! w-3! h-3!" />
     </div>
   );
 });

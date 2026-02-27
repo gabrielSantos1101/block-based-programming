@@ -9,6 +9,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePickerInput } from '@/components/ui/date-pick-input';
 import { TimePickerInput } from '@/components/ui/time-pick-input';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Heart, Star } from 'lucide-react';
 
 interface FormPreviewProps {
   sections: FormSection[];
@@ -41,7 +43,7 @@ export const FormPreview: React.FC<FormPreviewProps> = ({
           <Input
             value={field.label}
             onChange={(e) => onUpdateField(sectionId, field.id, { label: e.target.value })}
-            className="flex-1 min-w-[200px]"
+            className="flex-1 min-w-48"
             placeholder="Question text"
           />
 
@@ -54,15 +56,15 @@ export const FormPreview: React.FC<FormPreviewProps> = ({
               })
             }
           >
-            <SelectTrigger className="w-[170px]">
+            <SelectTrigger className="w-32">
               <SelectValue placeholder="Tipo" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="text">Short text</SelectItem>
               <SelectItem value="long_text">Long text</SelectItem>
               <SelectItem value="select">Dropdown</SelectItem>
-              <SelectItem value="radio">Single choice (radio)</SelectItem>
-              <SelectItem value="checkbox">Multiple choice (checkbox)</SelectItem>
+              <SelectItem value="radio">Single choice</SelectItem>
+              <SelectItem value="checkbox">Multiple choice</SelectItem>
               <SelectItem value="rating">Rating</SelectItem>
               <SelectItem value="date">Date</SelectItem>
               <SelectItem value="time">Time</SelectItem>
@@ -95,7 +97,7 @@ export const FormPreview: React.FC<FormPreviewProps> = ({
 
         {field.type === 'text' && <Input disabled placeholder="Short answer..." />}
         {field.type === 'date' && <DatePickerInput disabled label="Date" placeholder="Pick a date" />}
-        {field.type === 'time' && <TimePickerInput disabled label="Time" placeholder="HH:MM" />}
+        {field.type === 'time' && <TimePickerInput disabled label="Time" />}
 
         {field.type === 'rating' && (
           <div className="space-y-3">
@@ -117,7 +119,7 @@ export const FormPreview: React.FC<FormPreviewProps> = ({
               </Select>
 
               <Select
-                value={field.ratingIcon ?? 'star'}
+                value={field.ratingIcon ?? 'radio'}
                 onValueChange={(val) => onUpdateField(sectionId, field.id, { ratingIcon: val as any })}
               >
                 <SelectTrigger className="w-[150px]">
@@ -131,17 +133,36 @@ export const FormPreview: React.FC<FormPreviewProps> = ({
               </Select>
             </div>
 
-            <div className="flex gap-3 items-center">
-              {Array.from({ length: field.ratingScale ?? 5 }, (_, i) => (
-                <span key={i} className="text-slate-500 text-lg">
-                  {field.ratingIcon === 'heart'
-                    ? '❤'
-                    : field.ratingIcon === 'radio'
-                      ? '◯'
-                      : '★'}
-                </span>
-              ))}
-            </div>
+            <RadioGroup
+              value={String(Math.ceil((field.ratingScale ?? 5) / 2))}
+              className="flex items-center justify-evenly gap-2 text-slate-600"
+            >
+              {Array.from({ length: field.ratingScale ?? 5 }, (_, i) => {
+                const val = String(i + 1);
+                const icon = field.ratingIcon ?? 'radio';
+                const useIcon = icon === 'star' || icon === 'heart';
+                return (
+                  <div key={val} className="flex flex-col items-center gap-1 min-w-[40px]">
+                     <label
+                      className="cursor-pointer text-slate-500 hover:text-primary transition-colors flex flex-col items-center mt-1.5"
+                    >
+                    <RadioGroupItem
+                      value={val}
+                      id={`rating-preview-${field.id}-${val}`}
+                      className={cn(
+                        'data-[state=checked]:border-primary size-5',
+                        useIcon && 'sr-only hidden',
+                      )}
+                    />
+                   
+                      {icon === 'heart' && <Heart size={20} />}
+                      {icon === 'star' && <Star size={20} />}
+                      <span className="text-[0.625rem] mt-1 text-slate-500">{val}</span>
+                    </label>
+                  </div>
+                );
+              })}
+            </RadioGroup>
           </div>
         )}
 
@@ -179,7 +200,7 @@ export const FormPreview: React.FC<FormPreviewProps> = ({
                 const newOpts = [...(field.options ?? []), `Option ${count}`];
                 onUpdateField(sectionId, field.id, { options: newOpts });
               }}
-              className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+              className="text-xs text-primary hover:text-indigo-700 font-medium"
             >
               + Add option
             </button>
@@ -207,7 +228,7 @@ export const FormPreview: React.FC<FormPreviewProps> = ({
               className={cn(
                 'relative group rounded-xl border-2 transition-all duration-200 p-6 bg-white shadow-sm',
                 activeSectionId === section.id
-                  ? 'border-indigo-500 ring-4 ring-indigo-500/10'
+                  ? 'border-primary ring-4 ring-primary/10'
                 : 'border-slate-200 hover:border-slate-300',
             )}
           >
@@ -244,7 +265,7 @@ export const FormPreview: React.FC<FormPreviewProps> = ({
                     e.stopPropagation();
                     onAddField(section.id);
                 }}
-                className="w-full py-3 border-2 border-dashed border-slate-200 rounded-lg text-slate-400 hover:border-indigo-500 hover:text-indigo-500 hover:bg-indigo-50 transition-all flex items-center justify-center gap-2 font-medium"
+                className="w-full py-3 border-2 border-dashed border-slate-200 rounded-lg text-slate-400 hover:border-primary hover:text-primary hover:bg-indigo-50 transition-all flex items-center justify-center gap-2 font-medium"
               >
                 <Plus size={18} />
                 Add Field
@@ -255,7 +276,7 @@ export const FormPreview: React.FC<FormPreviewProps> = ({
 
         <button
           onClick={onAddSection}
-          className="w-full py-6 bg-white border-2 border-dashed border-slate-300 rounded-xl text-slate-500 hover:border-indigo-500 hover:text-indigo-500 hover:bg-indigo-50 transition-all flex flex-col items-center justify-center gap-2"
+          className="w-full py-6 bg-white border-2 border-dashed border-slate-300 rounded-xl text-slate-500 hover:border-primary hover:text-primary hover:bg-indigo-50 transition-all flex flex-col items-center justify-center gap-2"
         >
           <div className="p-3 bg-slate-100 rounded-full group-hover:bg-indigo-100">
             <Plus size={24} />
