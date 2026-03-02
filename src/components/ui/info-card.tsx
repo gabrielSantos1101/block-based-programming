@@ -89,7 +89,9 @@ function InfoCard({
 	return (
 		<InfoCardContext.Provider value={value}>
 			<HoverCard>
-				{hasTrigger ? null : <InfoCardTrigger>{icon}</InfoCardTrigger>}
+				{hasTrigger ? null : (
+					<InfoCardTrigger className="ml-2">{icon}</InfoCardTrigger>
+				)}
 				{children}
 			</HoverCard>
 		</InfoCardContext.Provider>

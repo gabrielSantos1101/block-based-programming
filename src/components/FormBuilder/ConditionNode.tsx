@@ -3,6 +3,7 @@ import { Plus, Trash2, X } from 'lucide-react';
 import { memo, useId } from 'react';
 import { cn } from '@/lib/utils';
 import type { ConditionRule, FormSection } from '@/types';
+import { InfoCard, InfoCardContent } from '@/components/ui/info-card';
 
 interface ConditionNodeData {
   label: string;
@@ -61,21 +62,29 @@ export const ConditionNode = memo(({ id, data, selected }: NodeProps) => {
         className="!bg-slate-400 !w-3 !h-3 hover:!bg-orange-500 transition-colors"
       />
 
-      <div className="bg-orange-50 border-b border-orange-100 p-3 flex justify-between items-center">
+      <div className="bg-orange-50 border-b border-orange-100 p-3 flex justify-between items-center gap-2">
         <h3 className="font-semibold text-orange-800 text-sm flex items-center gap-2">
           <span className="text-xs bg-orange-200 px-1.5 py-0.5 rounded text-orange-700">IF</span>
           Condition Logic
         </h3>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleDeleteNode();
-          }}
-          className="p-1 hover:bg-orange-200 rounded text-orange-400 hover:text-orange-700 transition-colors"
-          title="Delete Block"
-        >
-          <Trash2 size={14} />
-        </button>
+        <div className="flex items-center gap-2">
+          <InfoCard>
+            <InfoCardContent
+              title="How it works"
+              description="Each rule adds its own THEN output. Pick field, operator, and value; connect the right handle to the next block. The 'Else / Default' handle runs when no rule matches."
+            />
+          </InfoCard>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDeleteNode();
+            }}
+            className="p-1 hover:bg-orange-200 rounded text-orange-400 hover:text-orange-700 transition-colors"
+            title="Delete Block"
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
       </div>
 
       <div className="p-3 space-y-3">

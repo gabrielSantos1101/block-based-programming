@@ -2,6 +2,7 @@ import { Handle, type NodeProps, Position, useReactFlow } from '@xyflow/react';
 import { Plus, Trash2, X } from 'lucide-react';
 import { memo, useId } from 'react';
 import { cn } from '@/lib/utils';
+import { InfoCard, InfoCardContent } from '@/components/ui/info-card';
 
 interface LogicalOperatorNodeData {
   label: string;
@@ -89,7 +90,7 @@ export const LogicalOperatorNode = memo(({ id, data, selected }: NodeProps) => {
           config.bgColor,
           'border-b',
           config.borderColor,
-          'p-3 flex justify-between items-center',
+          'p-3 flex justify-between items-center gap-2',
         )}
       >
         <div className="flex items-center gap-2">
@@ -104,19 +105,27 @@ export const LogicalOperatorNode = memo(({ id, data, selected }: NodeProps) => {
           </span>
           <h3 className={cn('font-semibold text-sm', config.textColor)}>Logical Operator</h3>
         </div>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleDeleteNode();
-          }}
-          className={cn(
-            'p-1 rounded text-slate-400 hover:text-red-600 transition-colors',
-            config.hoverBg,
-          )}
-          title="Delete Block"
-        >
-          <Trash2 size={14} />
-        </button>
+        <div className="flex items-center gap-2">
+          <InfoCard>
+            <InfoCardContent
+              title="AND / OR / NOT"
+              description="Choose the operator. AND/OR accept multiple inputs; NOT flips a single value. Connect inputs on the left and the output on the right."
+            />
+          </InfoCard>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDeleteNode();
+            }}
+            className={cn(
+              'p-1 rounded text-slate-400 hover:text-red-600 transition-colors',
+              config.hoverBg,
+            )}
+            title="Delete Block"
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
       </div>
 
       <div className="p-3 space-y-3">

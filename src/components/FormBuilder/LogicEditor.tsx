@@ -26,6 +26,7 @@ import { cn } from '@/lib/utils';
 import { ActionNode } from './ActionNode';
 import { ConditionNode } from './ConditionNode';
 import { LogicalOperatorNode } from './LogicalOperatorNode';
+import { InfoCard, InfoCardContent } from '@/components/ui/info-card';
 
 interface LogicEditorProps {
   sections: FormSection[];
@@ -51,8 +52,14 @@ const SectionNode = memo(({ data, selected }: NodeProps) => {
     >
       <Handle type="target" position={Position.Top} className="bg-slate-400! w-3! h-3!" />
 
-      <div className="bg-slate-50 border-b border-slate-100 p-3">
+      <div className="bg-slate-50 border-b border-slate-100 p-3 flex items-center justify-between gap-2">
         <h3 className="font-semibold text-slate-800 text-sm">{label}</h3>
+        <InfoCard>
+          <InfoCardContent
+            title="Section node"
+            description="Represents a form section. Connect its output to conditions or logic blocks; incoming edges activate this section. The list shows a preview of contained fields."
+          />
+        </InfoCard>
       </div>
 
       <div className="p-3 space-y-2">

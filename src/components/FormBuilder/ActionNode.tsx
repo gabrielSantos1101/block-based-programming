@@ -4,6 +4,7 @@ import { Globe, Trash2, Zap } from 'lucide-react';
 import { memo } from 'react';
 import { cn } from '@/lib/utils';
 import type { ActionConfig } from '@/types';
+import { InfoCard, InfoCardContent } from '@/components/ui/info-card';
 
 interface ActionNodeData {
   label: string;
@@ -51,6 +52,16 @@ export const ActionNode = memo(({ id, data, selected }: NodeProps) => {
           {isRedirect ? 'Redirect URL' : 'Trigger Action'}
         </h3>
         <div className="flex items-center gap-2">
+          <InfoCard>
+            <InfoCardContent
+              title="How this node works"
+              description={
+                isRedirect
+                  ? 'Sends the user to a destination after this flow finishes. Provide the full URL.'
+                  : 'Fires a webhook/custom action. Set the action ID or payload that your backend expects.'
+              }
+            />
+          </InfoCard>
           <select
             className="text-[10px] bg-white border border-slate-200 rounded px-1 py-0.5"
             value={actionConfig?.type || 'redirect'}
