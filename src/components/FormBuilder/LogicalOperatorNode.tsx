@@ -1,6 +1,6 @@
 import { Handle, type NodeProps, Position, useReactFlow } from '@xyflow/react';
 import { Plus, Trash2, X } from 'lucide-react';
-import { memo, useId } from 'react';
+import { memo } from 'react';
 import { cn } from '@/lib/utils';
 import { InfoCard, InfoCardContent } from '@/components/ui/info-card';
 
@@ -79,12 +79,6 @@ export const LogicalOperatorNode = memo(({ id, data, selected }: NodeProps) => {
         selected && [config.selectedBorder, 'ring-2', config.ringColor],
       )}
     >
-      <Handle
-        type="target"
-        position={Position.Top}
-        className="bg-slate-400! w-3! h-3! hover:bg-slate-600! transition-colors"
-      />
-
       <div
         className={cn(
           config.bgColor,
