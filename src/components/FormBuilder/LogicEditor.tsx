@@ -1,11 +1,4 @@
-import type {
-	Connection,
-	Edge,
-	Node,
-	NodeProps,
-	OnEdgesChange,
-	OnNodesChange,
-} from "@xyflow/react";
+import type { Connection, Edge, Node, NodeProps } from "@xyflow/react";
 import {
 	addEdge,
 	Background,
@@ -23,22 +16,11 @@ import "@xyflow/react/dist/style.css";
 import { GitBranch, Split, Zap } from "lucide-react";
 import { InfoCard, InfoCardContent } from "@/components/ui/info-card";
 import { cn } from "@/lib/utils";
-import type { FormField, FormSection } from "@/types";
+import type { FormField } from "@/types";
 import { ActionNode } from "./ActionNode";
 import { ConditionNode } from "./ConditionNode";
 import { LogicalOperatorNode } from "./LogicalOperatorNode";
-
-interface LogicEditorProps {
-	sections: FormSection[];
-	activeSectionId: string | null;
-	onSectionSelect: (id: string | null) => void;
-	nodes: Node[];
-	edges: Edge[];
-	onNodesChange: OnNodesChange;
-	onEdgesChange: OnEdgesChange;
-	setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
-	setEdges: React.Dispatch<React.SetStateAction<Edge[]>>;
-}
+import { useFormBuilder } from "@/contexts/FormBuilderContext";
 
 const SectionNode = memo(({ data, selected }: NodeProps) => {
 	const { label, fields } = data as { label: string; fields: FormField[] };
@@ -95,17 +77,19 @@ const SectionNode = memo(({ data, selected }: NodeProps) => {
 	);
 });
 
-export const LogicEditor: React.FC<LogicEditorProps> = ({
-	sections,
-	activeSectionId,
-	onSectionSelect,
-	nodes,
-	edges,
-	onNodesChange,
-	onEdgesChange,
-	setNodes,
-	setEdges,
-}) => {
+export const LogicEditor: React.FC = () => {
+	const {
+		sections,
+		activeSectionId,
+		setActiveSectionId,
+		nodes,
+		edges,
+		onNodesChange,
+		onEdgesChange,
+		setNodes,
+		setEdges,
+	} = useFormBuilder();
+
 	const nodeTypes = useMemo(
 		() => ({
 			sectionNode: SectionNode,
@@ -306,12 +290,12 @@ export const LogicEditor: React.FC<LogicEditorProps> = ({
 				onEdgeClick={onEdgeClick}
 				onNodeClick={(_, node) => {
 					if (node.type === "sectionNode") {
-						onSectionSelect(node.id);
+						setActiveSectionId(node.id);
 					} else {
-						onSectionSelect(null);
+						setActiveSectionId(null);
 					}
 				}}
-				onPaneClick={() => onSectionSelect(null)}
+				onPaneClick={() => setActiveSectionId(null)}
 				nodeTypes={nodeTypes}
 				fitView
 				attributionPosition="bottom-right"

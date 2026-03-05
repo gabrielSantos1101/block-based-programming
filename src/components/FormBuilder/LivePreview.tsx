@@ -16,27 +16,20 @@ import type {
 	FormField,
 	FormSection,
 } from "@/types";
-
-const STORAGE_KEY = "livePreviewFlow";
+import { useFormBuilder } from "@/contexts/FormBuilderContext";
 
 const randomLatency = () => Math.floor(200 + Math.random() * 1200); // 200ms to ~1.4s
 
 interface LivePreviewProps {
-	sections: FormSection[];
-	nodes: Node[];
-	edges: Edge[];
 	onClose: () => void;
 }
 
-export const LivePreview: React.FC<LivePreviewProps> = ({
-	sections,
-	nodes,
-	edges,
-	onClose,
-}) => {
-	const [loadedSections, setLoadedSections] = useState<FormSection[]>(sections);
-	const [loadedNodes, setLoadedNodes] = useState<Node[]>(nodes);
-	const [loadedEdges, setLoadedEdges] = useState<Edge[]>(edges);
+export const LivePreview: React.FC<LivePreviewProps> = ({ onClose }) => {
+	const { sections, nodes, edges } = useFormBuilder();
+
+	const [loadedSections, setLoadedSections] = useState<FormSection[]>([]);
+	const [loadedNodes, setLoadedNodes] = useState<typeof nodes>([]);
+	const [loadedEdges, setLoadedEdges] = useState<typeof edges>([]);
 	const [loading, setLoading] = useState(true);
 	const [currentSectionId, setCurrentSectionId] = useState<string | null>(null);
 	const [formValues, setFormValues] = useState<
@@ -231,42 +224,15 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
 	};
 
 	useEffect(() => {
-		if (typeof window === "undefined") return;
-		if (!sections.length && !nodes.length && !edges.length) return;
-		const payload = { sections, nodes, edges };
-		localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-	}, [sections, nodes, edges]);
-
-	useEffect(() => {
-		if (typeof window === "undefined") return;
-
 		const timer = setTimeout(() => {
-			try {
-				const saved = localStorage.getItem(STORAGE_KEY);
-				if (saved) {
-					const parsed = JSON.parse(saved) as {
-						sections?: FormSection[];
-						nodes?: Node[];
-						edges?: Edge[];
-					};
-					if (parsed.sections?.length) setLoadedSections(parsed.sections);
-					if (parsed.nodes?.length) setLoadedNodes(parsed.nodes);
-					if (parsed.edges?.length) setLoadedEdges(parsed.edges);
-				} else if (sections.length || nodes.length || edges.length) {
-					localStorage.setItem(
-						STORAGE_KEY,
-						JSON.stringify({ sections, nodes, edges }),
-					);
-				}
-			} catch (err) {
-				console.warn("Failed to hydrate preview data", err);
-			} finally {
-				setLoading(false);
-			}
+			setLoadedSections(sections);
+			setLoadedNodes(nodes);
+			setLoadedEdges(edges);
+			setLoading(false);
 		}, randomLatency());
 
 		return () => clearTimeout(timer);
-	}, []);
+	}, [sections, nodes, edges]);
 
 	useEffect(() => {
 		if (!loading && loadedSections.length > 0 && !currentSectionId) {
